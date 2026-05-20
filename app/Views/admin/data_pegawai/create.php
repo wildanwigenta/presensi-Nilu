@@ -63,6 +63,27 @@
             </div>
 
             <div class="input-style-1">
+            <label>Shift</label>
+            <div class="row">
+                <?php if(!empty($shifts)): ?>
+                    <?php foreach($shifts as $shift): ?>
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="shift_ids[]" value="<?= $shift['id'] ?>" id="shift_<?= $shift['id'] ?>"
+                                    <?= in_array($shift['id'], old('shift_ids', [])) ? 'checked' : '' ?> >
+                                <label class="form-check-label" for="shift_<?= $shift['id'] ?>">
+                                    <?= $shift['nama_lokasi'] ?> - <?= $shift['nama_shift'] ?> (<?= $shift['jam_masuk'] ?> - <?= $shift['jam_keluar'] ?>)
+                                </label>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12 text-muted">Belum ada data shift.</div>
+                <?php endif; ?>
+            </div>
+            </div>
+
+            <div class="input-style-1">
             <label>Foto</label>
             <input type="file"  class="form-control <?= ($validation->hasError('foto'))? 'is-invalid' : '' ?>" 
             name="foto" />
