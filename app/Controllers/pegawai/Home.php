@@ -77,6 +77,7 @@ class Home extends BaseController
     'id_pegawai' => $this->request->getPost('id_pegawai'),
     'tanggal_masuk' => $this->request->getPost('tanggal_masuk'),
     'jam_masuk' => $this->request->getPost('jam_masuk'),
+    'shift_id' => $this->request->getPost('shift_id'),
 ];
 
         return view('pegawai/ambil_foto', $data);
@@ -88,6 +89,7 @@ class Home extends BaseController
         $id_pegawai = $request->getPost('id_pegawai');
         $tanggal_masuk = $request->getPost('tanggal_masuk');
         $jam_masuk = $request->getPost('jam_masuk');
+        $shift_id = $request->getPost('shift_id');
         $foto_masuk = $request->getPost('foto_masuk');
 
         $foto_masuk = str_replace('data:image/jpeg;base64,', '', $foto_masuk );
@@ -102,6 +104,7 @@ class Home extends BaseController
             'id_pegawai' =>$id_pegawai,
             'tanggal_masuk' =>$tanggal_masuk,
             'jam_masuk' =>$jam_masuk,
+            'shift_id' => $shift_id,
             'foto_masuk' => $nama_foto
            ]);
         session()->setFlashData('berhasil', 'Presensi Masuk Berhasil');
