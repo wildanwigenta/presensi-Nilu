@@ -165,6 +165,7 @@ class DataPegawai extends BaseController
         } else {
             $pegawaiModel = new PegawaiModel();
             $nipBaru = $this->generateNIP();
+            $shiftModel = new ShiftModel();
 
             $foto = $this->request->getFile('foto');
             if($foto->getError() == 4){
@@ -358,6 +359,7 @@ class DataPegawai extends BaseController
         } else {
             $pegawaiModel = new PegawaiModel();
             $userModel = new UserModel();
+            $shiftModel = new ShiftModel();
 
             $foto = $this->request->getFile('foto');
 
