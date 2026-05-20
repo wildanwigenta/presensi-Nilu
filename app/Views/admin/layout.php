@@ -265,6 +265,9 @@
     <script>
       $(document).ready(function () {
 
+        // Nonaktifkan error alert DataTables
+        $.fn.dataTable.ext.errMode = 'none';
+
         // DataTables
         $('#datatables').DataTable({
             language: {
