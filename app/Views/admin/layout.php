@@ -266,7 +266,22 @@
       $(document).ready(function () {
 
         // DataTables
-        $('#datatables').DataTable();
+        $('#datatables').DataTable({
+            language: {
+                emptyTable: "Data Masih Kosong",
+                zeroRecords: "Data tidak ditemukan",
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+                infoEmpty: "Tidak ada data",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            }
+        });
 
         // SweetAlert - notifikasi berhasil
         <?php if (session()->has('berhasil')) { ?>
