@@ -8,37 +8,44 @@
   <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon" />
   <title><?= $title ?></title>
 
-  <!-- ========== CSS ========== -->
+  <!-- ========== All CSS files linkup ========= -->
   <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap.min.css') ?>" />
   <link rel="stylesheet" href="<?= base_url('assets/css/lineicons.css') ?>" />
   <link rel="stylesheet" href="<?= base_url('assets/css/materialdesignicons.min.css') ?>" />
   <link rel="stylesheet" href="<?= base_url('assets/css/fullcalendar.css') ?>" />
   <link rel="stylesheet" href="<?= base_url('assets/css/main.css') ?>" />
+
+  <!-- ========== Tabler icon ========= -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.35.0/tabler-icons.min.css"
     integrity="sha512-gzw5zNP2TRq+DKyAqZfDclaTG4dOrGJrwob2Fc8xwcJPDPVij0HowLIMZ8c1NefFM0OZZYUUUNoPfcoI5jqudw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- datatables-->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.dataTables.css" />
+  <!-- leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- leaflet js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 
 <body>
-
-  <!-- ======== Preloader ======== -->
+  <!-- ======== Preloader =========== -->
   <div id="preloader">
     <div class="spinner"></div>
   </div>
+  <!-- ======== Preloader =========== -->
 
-  <!-- ======== Sidebar ======== -->
+  <!-- ======== sidebar-nav start =========== -->
   <aside class="sidebar-nav-wrapper">
     <div class="navbar-logo">
       <a href="index.html">
-        <img style="width: 80%;" src="<?= base_url('assets/images/logo/logo nilu.png') ?>" alt="logo" />
+        <img style="width: 80%;" src="<?= base_url('assets/images/logo/logo nilu.png')?>" alt="logo" />
       </a>
     </div>
     <nav class="sidebar-nav">
       <ul>
-
         <li class="nav-item mb-2">
           <a href="<?= base_url('admin/home') ?>">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -68,20 +75,24 @@
 
         <li class="nav-item nav-item-has-children mb-2">
           <a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#master-data"
-            aria-controls="master-data" aria-expanded="false" aria-label="Toggle navigation">
+            aria-controls="ddmenu_1" aria-expanded="false" aria-label="Toggle navigation">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-database">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" />
               <path d="M4 6v6a8 3 0 0 0 16 0v-6" />
-              <path d="M4 12v6a8 3 0 0 0 16 0v-6" />
-            </svg>
+              <path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg>
+
             <span class="text">Master Data</span>
           </a>
           <ul id="master-data" class="collapse dropdown-nav">
-            <li><a href="<?= base_url('admin/jabatan') ?>">Data Jabatan</a></li>
-            <li><a href="<?= base_url('admin/lokasi_presensi') ?>">Lokasi Presensi</a></li>
+            <li>
+              <a href="<?= base_url('admin/jabatan') ?>"> Data Jabatan </a>
+            </li>
+            <li>
+              <a href="<?= base_url('admin/lokasi_presensi') ?>"> Lokasi Presensi </a>
+            </li>
           </ul>
         </li>
 
@@ -103,13 +114,16 @@
             <span class="text">Rekap Presensi</span>
           </a>
           <ul id="ddmenu_1" class="collapse dropdown-nav">
-            <li><a href="<?= base_url('admin/rekap_harian') ?>">Rekap Harian</a></li>
-            <li><a href="<?= base_url('admin/rekap_bulanan') ?>">Rekap Bulanan</a></li>
+            <li>
+              <a href="<?= base_url('admin/rekap_harian') ?>"> Rekap Harian </a>
+            </li>
+            <li>
+              <a href="<?= base_url('admin/rekap_bulanan') ?>"> Rekap bulanan </a>
+            </li>
           </ul>
         </li>
-
         <li class="nav-item mb-2">
-          <a href="<?= base_url('admin/ketidakhadiran') ?>">
+          <a href="<?= base_url('admin/ketidakhadiran')?>">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-user-x">
@@ -137,16 +151,17 @@
           </a>
         </li>
 
+
       </ul>
     </nav>
+
   </aside>
   <div class="overlay"></div>
-  <!-- ======== Sidebar end ======== -->
+  <!-- ======== sidebar-nav end =========== -->
 
-  <!-- ======== Main Wrapper ======== -->
+  <!-- ======== main-wrapper start =========== -->
   <main class="main-wrapper">
-
-    <!-- ======== Header ======== -->
+    <!-- ========== header start ========== -->
     <header class="header">
       <div class="container-fluid">
         <div class="row">
@@ -161,11 +176,14 @@
           </div>
           <div class="col-lg-7 col-md-7 col-6">
             <div class="header-right">
+
+              <!-- profile start -->
               <div class="profile-box ml-15">
                 <button class="dropdown-toggle bg-transparent border-0" type="button" id="profile"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   <div class="profile-info">
                     <div class="info">
+
                       <div>
                         <h6 class="fw-500 text-uppercase"><?= session()->get('username') ?></h6>
                         <p><?= session()->get('role_id') ?></p>
@@ -187,24 +205,40 @@
                     </div>
                   </li>
                   <li class="divider"></li>
-                  <li><a href="#0"><i class="lni lni-user"></i> View Profile</a></li>
-                  <li><a href="#0"><i class="lni lni-alarm"></i> Notifications</a></li>
-                  <li><a href="#0"><i class="lni lni-inbox"></i> Messages</a></li>
-                  <li><a href="#0"><i class="lni lni-cog"></i> Settings</a></li>
+                  <li>
+                    <a href="#0">
+                      <i class="lni lni-user"></i> View Profile
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#0">
+                      <i class="lni lni-alarm"></i> Notifications
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#0"> <i class="lni lni-inbox"></i> Messages </a>
+                  </li>
+                  <li>
+                    <a href="#0"> <i class="lni lni-cog"></i> Settings </a>
+                  </li>
                   <li class="divider"></li>
-                  <li><a href="#0"><i class="lni lni-exit"></i> Sign Out</a></li>
+                  <li>
+                    <a href="#0"> <i class="lni lni-exit"></i> Sign Out </a>
+                  </li>
                 </ul>
               </div>
+              <!-- profile end -->
             </div>
           </div>
         </div>
       </div>
     </header>
-    <!-- ======== Header end ======== -->
+    <!-- ========== header end ========== -->
 
-    <!-- ======== Section ======== -->
+    <!-- ========== section start ========== -->
     <section class="section">
       <div class="container-fluid">
+        <!-- ========== title-wrapper start ========== -->
         <div class="title-wrapper pt-30">
           <div class="row align-items-center">
             <div class="col-md-6">
@@ -212,21 +246,34 @@
                 <h2><?= $title ?></h2>
               </div>
             </div>
+            <!-- end col -->
+
           </div>
+          <!-- end row -->
         </div>
+        <!-- ========== title-wrapper end ========== -->
 
         <?= $this->renderSection('content') ?>
       </div>
+      <!-- end container -->
     </section>
-    <!-- ======== Section end ======== -->
+    <!-- ========== section end ========== -->
 
-    <!-- ======== Footer ======== -->
+    <!-- ========== footer start =========== -->
     <footer class="footer">
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-6 order-last order-md-first">
-            <div class="copyright text-center text-md-start"></div>
+            <div class="copyright text-center text-md-start">
+              <p class="text-sm">
+                Designed and Developed by
+                <a href="https://plainadmin.com" rel="nofollow" target="_blank">
+                  PlainAdmin
+                </a>
+              </p>
+            </div>
           </div>
+          <!-- end col-->
           <div class="col-md-6">
             <div class="terms d-flex justify-content-center justify-content-md-end">
               <a href="#0" class="text-sm">Term & Conditions</a>
@@ -234,104 +281,77 @@
             </div>
           </div>
         </div>
+        <!-- end row -->
       </div>
+      <!-- end container -->
     </footer>
-    <!-- ======== Footer end ======== -->
-
+    <!-- ========== footer end =========== -->
   </main>
-  <!-- ======== Main Wrapper end ======== -->
+  <!-- ======== main-wrapper end =========== -->
 
-  <!-- ======== Javascript ======== -->
+  <!-- ========= All Javascript files linkup ======== -->
+  <script src="<?= base_url('assets/js/bootstrap.bundle.min.js')?>"></script>
+  <script src="<?= base_url('assets/js/jvectormap.min.js')?>"></script>
+  <script src="<?= base_url('assets/js/polyfill.js')?>"></script>
+  <script src="<?= base_url('assets/js/main.js')?>"></script>
 
-  <!-- jQuery (harus paling pertama) -->
+  <!--jquery-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
     integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <!-- DataTables -->
+  <!-- datatables -->
   <script src="https://cdn.datatables.net/2.3.6/js/dataTables.js"></script>
 
-  <!-- SweetAlert2 -->
+  <!--sweetalert-->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-  <!-- Local Scripts -->
-  <script src="<?= base_url('assets/js/bootstrap.bundle.min.js') ?>"></script>
-  <script src="<?= base_url('assets/js/jvectormap.min.js') ?>"></script>
-  <script src="<?= base_url('assets/js/polyfill.js') ?>"></script>
-  <script src="<?= base_url('assets/js/main.js') ?>"></script>
-
   <script>
+    // datatables
+    $(document).ready(function () {
+      $('#datatables').DataTable();
+    });
+    
+    //sweetalert berhasil
+    <?php if (session()->getFlashdata('berhasil')) : ?>
+    $(function () {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
 
+      Toast.fire({
+        icon: "success",
+            title: "<?= session()->getFlashdata('berhasil') ?>"
+        });
+    });
+    <?php endif; ?>
 
-    jQuery(document).ready(function ($) {
+    //sweetalert konfirmasi hapus
+    $('.tombol-hapus').on('click', function () {
+      const getLink = $(this).attr('href');
 
-      $.fn.dataTable.ext.errMode = 'none';
-
-      $('#datatables').DataTable({
-        language: {
-          emptyTable: "Data Masih Kosong",
-          zeroRecords: "Data tidak ditemukan",
-          search: "Cari:",
-          lengthMenu: "Tampilkan _MENU_ data",
-          info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
-          infoEmpty: "Tidak ada data",
-          paginate: {
-            first: "Pertama",
-            last: "Terakhir",
-            next: "Selanjutnya",
-            previous: "Sebelumnya"
-          }
+      Swal.fire({
+        title: "yakin hapus?",
+        text: "data yang sudah di hapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ya!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = getLink
         }
       });
-
-      // SweetAlert - notifikasi berhasil
-      <
-      ? php
-      if (session() - > has('berhasil')) {
-        ? >
-        const Toast = Swal.mixin({
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-          }
-        });
-        Toast.fire({
-          icon: "success",
-          title: "<?= $_SESSION['berhasil'] ?>"
-        }); <
-        ? php
-      } ? >
-
-      // SweetAlert - konfirmasi hapus
-      $('.tombol-hapus').on('click', function () {
-        const getLink = $(this).attr('href');
-        Swal.fire({
-          title: "Yakin hapus?",
-          text: "Data yang sudah dihapus tidak dapat dikembalikan!",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ya!"
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = getLink;
-          }
-        });
-        return false;
-      });
+      return false;
 
     });
   </script>
+
 
 </body>
 
