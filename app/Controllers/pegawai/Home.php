@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\LokasiPresensiModel;
 use App\Models\PegawaiModel;
 use App\Models\PresensiModel;
+use App\Models\PegawaiShiftModel;
 
 
 class Home extends BaseController
@@ -17,6 +18,7 @@ class Home extends BaseController
         $lokasi_presensi = new LokasiPresensiModel();
         $pegawai_model = new PegawaiModel();
         $presensi_model = new PresensiModel();
+        $pegawai_shift_model = new PegawaiShiftModel();
         
         $id_pegawai = session()->get('id_pegawai');
         
@@ -32,6 +34,12 @@ class Home extends BaseController
             session()->setFlashdata('pesan', 'Data pegawai tidak ditemukan');
             return redirect()->to('/logout');
         }
+
+        $shifts = $pegawai_shift_model
+            ->select('shifts.*')
+            ->join('shifts', 'shifts.id = pegawai_shift.shift_id')
+            ->where('pegawai_shift.pegawai_id', $id_pegawai)
+            ->findAll();
         
         $data = [
             'title' => 'Home', 
@@ -39,7 +47,8 @@ class Home extends BaseController
             'cek_presensi' => $presensi_model->where('id_pegawai', $id_pegawai)->where('tanggal_masuk', date('Y-m-d'))->countAllResults(),
             'cek_presensi_keluar' => $presensi_model->where('id_pegawai', $id_pegawai)->where('tanggal_masuk', date('Y-m-d'))->where('tanggal_keluar IS NOT NULL')->countAllResults(),
             'ambil_presensi_masuk' => $presensi_model->where('id_pegawai', $id_pegawai)->where('tanggal_masuk', date('Y-m-d'))->first(),
-            'pegawai' => $pegawai
+            'pegawai' => $pegawai,
+            'shifts' => $shifts
         ];
 
         return view('pegawai/home', $data);
