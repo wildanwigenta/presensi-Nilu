@@ -265,12 +265,12 @@
           <div class="row">
             <div class="col-md-6 order-last order-md-first">
               <div class="copyright text-center text-md-start">
-                <p class="text-sm">
+                <!-- <p class="text-sm">
                   Designed and Developed by
                   <a href="https://plainadmin.com" rel="nofollow" target="_blank">
                     PlainAdmin
                   </a>
-                </p>
+                </p> -->
               </div>
             </div>
             <!-- end col-->
