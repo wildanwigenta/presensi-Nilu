@@ -3,7 +3,6 @@
 namespace App\Controllers\Pegawai;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\LokasiPresensiModel;
 use App\Models\PegawaiModel;
 use App\Models\PresensiModel;
@@ -80,6 +79,46 @@ class Home extends BaseController
         $latitude_outlet = (float) $this->request->getPost('latitude_outlet');
         $radius = $this->request->getPost('radius');
         $shift_id = $this->request->getPost('shift_id');
+        $tanggal_masuk = $this->request->getPost('tanggal_masuk');
+
+        $id_pegawai = session()->get('id_pegawai');
+        if (!$id_pegawai) {
+            session()->setFlashdata('gagal', 'Sesi pegawai tidak valid.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
+        if (empty($shift_id) || !is_numeric($shift_id)) {
+            session()->setFlashdata('gagal', 'Pilih shift terlebih dahulu.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
+        if ((int) $this->request->getPost('id_pegawai') !== (int) $id_pegawai) {
+            session()->setFlashdata('gagal', 'Data pegawai tidak sesuai.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
+        $pegawaiShiftModel = new PegawaiShiftModel();
+        $assignedShift = $pegawaiShiftModel
+            ->where('pegawai_id', $id_pegawai)
+            ->where('shift_id', (int) $shift_id)
+            ->countAllResults();
+
+        if ($assignedShift < 1) {
+            session()->setFlashdata('gagal', 'Shift yang dipilih tidak terdaftar untuk Anda.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
+        $presensi_model = new PresensiModel();
+        $existing = $presensi_model
+            ->where('id_pegawai', $id_pegawai)
+            ->where('tanggal_masuk', $tanggal_masuk)
+            ->where('shift_id', $shift_id)
+            ->countAllResults();
+
+        if ($existing > 0) {
+            session()->setFlashdata('gagal', 'Anda telah melakukan presensi untuk shift yang sama hari ini');
+            return redirect()->to(base_url('pegawai/home'));
+        }
 
         $jarak = sin(deg2rad($latitude_pegawai)) * sin(deg2rad($latitude_outlet)) + 
         cos(deg2rad($latitude_pegawai)) * cos(deg2rad($latitude_outlet));
@@ -94,21 +133,10 @@ class Home extends BaseController
         return redirect()->to(base_url('pegawai/home'));
     }
 
-        $presensi_model = new PresensiModel();
-        $existing = $presensi_model
-            ->where('id_pegawai', $this->request->getPost('id_pegawai'))
-            ->where('tanggal_masuk', $this->request->getPost('tanggal_masuk'))
-            ->where('shift_id', $shift_id)
-            ->countAllResults();
-
-        if($existing > 0){
-            session()->setFlashdata('gagal', 'Anda telah melakukan presensi untuk shift yang sama hari ini');
-            return redirect()->to(base_url('pegawai/home'));
-        }
 
         $data = [
             'title' => "Ambil Foto Selfie",
-            'id_pegawai' => $this->request->getPost('id_pegawai'),
+            'id_pegawai' => $id_pegawai,
             'tanggal_masuk' => $this->request->getPost('tanggal_masuk'),
             'jam_masuk' => $this->request->getPost('jam_masuk'),
             'shift_id' => $shift_id,
@@ -119,11 +147,31 @@ class Home extends BaseController
     public function presensi_masuk_aksi()
     {
         $request = \Config\Services::request();
-        $id_pegawai = $request->getPost('id_pegawai');
+        $id_pegawai = session()->get('id_pegawai');
+        if (!$id_pegawai) {
+            session()->setFlashdata('gagal', 'Sesi pegawai tidak valid.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
         $tanggal_masuk = $request->getPost('tanggal_masuk');
         $jam_masuk = $request->getPost('jam_masuk');
         $shift_id = $request->getPost('shift_id');
         $foto_masuk = $request->getPost('foto_masuk');
+
+        if (empty($shift_id) || !is_numeric($shift_id)) {
+            session()->setFlashdata('gagal', 'Shift tidak valid.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
+        $pegawaiShiftModel = new PegawaiShiftModel();
+        $assignedShift = $pegawaiShiftModel
+            ->where('pegawai_id', $id_pegawai)
+            ->where('shift_id', (int) $shift_id)
+            ->countAllResults();
+
+        if ($assignedShift < 1) {
+            session()->setFlashdata('gagal', 'Shift yang dipilih tidak terdaftar untuk Anda.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
 
         $foto_masuk = str_replace('data:image/jpeg;base64,', '', $foto_masuk );
         $foto_masuk = base64_decode($foto_masuk);
@@ -191,6 +239,11 @@ class Home extends BaseController
     public function presensi_keluar_aksi($id)
     {
         $id_pegawai = session()->get('id_pegawai');
+        if (!$id_pegawai) {
+            session()->setFlashdata('gagal', 'Sesi pegawai tidak valid.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
         $request = \Config\Services::request();
         $tanggal_keluar = $request->getPost('tanggal_keluar');
         $jam_keluar = $request->getPost('jam_keluar');

@@ -68,7 +68,7 @@ class PresensiModel extends Model
         $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
-        $builder->where('id_Pegawai', $id_pegawai);
+        $builder->where('id_pegawai', $id_pegawai);
         return $builder->get()->getResultArray();
             }
 
@@ -79,7 +79,7 @@ class PresensiModel extends Model
         $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
-        $builder->where('id_Pegawai', $id_pegawai);
+        $builder->where('id_pegawai', $id_pegawai);
         $builder->where('tanggal_masuk', $filter_tanggal);
         return $builder->get()->getResultArray();
             }

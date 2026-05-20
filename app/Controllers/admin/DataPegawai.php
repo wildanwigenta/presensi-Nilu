@@ -203,6 +203,16 @@ class DataPegawai extends BaseController
             if (!is_array($selectedShifts)) {
                 $selectedShifts = [];
             }
+            $selectedShifts = array_filter(array_unique(array_map('intval', $selectedShifts)));
+
+            if (!empty($selectedShifts)) {
+                $validShifts = $shiftModel->whereIn('id', $selectedShifts)->countAllResults();
+                if ($validShifts !== count($selectedShifts)) {
+                    session()->setFlashData('gagal', 'Pilihan shift tidak valid.');
+                    return redirect()->back()->withInput();
+                }
+            }
+
             foreach ($selectedShifts as $shiftId) {
                 $pegawaiShiftModel->insert([
                     'pegawai_id' => $id_pegawai,
@@ -374,12 +384,15 @@ class DataPegawai extends BaseController
                 $password = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
             }
 
+            $currentUser = $userModel->where('id_pegawai', $id)->first();
+            $status = $this->request->getPost('status') ?? ($currentUser['status'] ?? 'Aktif');
+
             $userModel
                 ->where('id_pegawai', $id)
                 ->set([
                     'username' => $this->request->getPost('username'),
                     'password' => $password,
-                    'status' => $this->request->getPost('status'),
+                    'status' => $status,
                     'role' => $this->request->getPost('role'), 
                 ])
                 ->update();
@@ -388,6 +401,15 @@ class DataPegawai extends BaseController
             $selectedShifts = $this->request->getPost('shift_ids');
             if (!is_array($selectedShifts)) {
                 $selectedShifts = [];
+            }
+            $selectedShifts = array_filter(array_unique(array_map('intval', $selectedShifts)));
+
+            if (!empty($selectedShifts)) {
+                $validShifts = $shiftModel->whereIn('id', $selectedShifts)->countAllResults();
+                if ($validShifts !== count($selectedShifts)) {
+                    session()->setFlashData('gagal', 'Pilihan shift tidak valid.');
+                    return redirect()->back()->withInput();
+                }
             }
 
             $pegawaiShiftModel->where('pegawai_id', $id)->delete();
