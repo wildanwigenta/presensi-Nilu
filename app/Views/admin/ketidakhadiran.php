@@ -19,25 +19,25 @@
     <?php if($ketidakhadiran) : ?>
     <tbody>
     <?php $no = 1;
-    foreach($ketidakhadiran as $ketidakhadiran) : ?>
+    foreach($ketidakhadiran as $item) : ?>
     
         <tr>
             <td><?= $no++ ?></td>
-            <td><?= $ketidakhadiran['tanggal']?></td>
-            <td><?= $ketidakhadiran['keterangan']?></td>
-            <td><?= $ketidakhadiran['deskripsi']?></td>
+            <td><?= $item['tanggal']?></td>
+            <td><?= $item['keterangan']?></td>
+            <td><?= $item['deskripsi']?></td>
             <td>
-                <a class="badge bg-primary" href="<?= base_url('file_ketidakhadiran/' . $ketidakhadiran['file'])?>">Dowenload</a>
+                <a class="badge bg-primary" href="<?= base_url('file_ketidakhadiran/' . $item['file'])?>">Download</a>
             </td>
             <td> 
-                <?php if($ketidakhadiran['status'] == 'Pending' ) : ?>
-                <span class="text-danger"><?= $ketidakhadiran['status']?></span>
+                <?php if($item['status'] == 'Pending' ) : ?>
+                <span class="text-danger"><?= $item['status']?></span>
                 <?php else : ?>
-                <span class="text-success"><?= $ketidakhadiran['status']?></span>
+                <span class="text-success"><?= $item['status']?></span>
                 <?php endif ;?>
             </td>
             <td>
-                <a  class="badge bg-success" href="<?= base_url('admin/approved_ketidakhadiran/' . $ketidakhadiran['id']) ?>">Approved</a>
+                <a  class="badge bg-success" href="<?= base_url('admin/approved_ketidakhadiran/' . $item['id']) ?>">Approved</a>
             </td>
         </tr>
     
