@@ -44,6 +44,16 @@
         }
       ?>
 
+      <div class="mb-3 text-start">
+        <label for="shift_id" class="form-label">Pilih Shift</label>
+        <select class="form-select" id="shift_id" name="shift_id" required>
+          <option value="" selected disabled>Pilih shift</option>
+          <?php foreach($shifts as $shift): ?>
+            <option value="<?= $shift['id'] ?>"><?= esc($shift['nama_shift']) ?><?php if(!empty($shift['jam_masuk']) || !empty($shift['jam_keluar'])): ?> (<?= esc($shift['jam_masuk']) ?> - <?= esc($shift['jam_keluar']) ?>)<?php endif; ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
       <input type="hidden" name="latitude_outlet" value="<?= $lokasi_presensi['latitude'] ?>">
       <input type="hidden" name="longitude_outlet" value="<?= $lokasi_presensi['longitude'] ?>">
       <input type="hidden" name="radius" value="<?= $lokasi_presensi['radius'] ?>">
