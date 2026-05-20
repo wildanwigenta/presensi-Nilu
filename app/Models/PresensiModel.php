@@ -12,6 +12,7 @@ class PresensiModel extends Model
         'id_pegawai',
         'tanggal_masuk',
         'jam_masuk',
+        'shift_id',
         'foto_masuk',
         'tanggal_keluar',
         'jam_keluar',

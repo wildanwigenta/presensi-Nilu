@@ -9,6 +9,7 @@ crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <input type="hidden" id="id_pegawai" name="id_pegawai" value="<?= $id_pegawai ?>">
 <input type="hidden" id="tanggal_masuk" name="tanggal_masuk" value="<?= $tanggal_masuk ?>">
 <input type="hidden" id="jam_masuk" name="jam_masuk" value="<?= $jam_masuk ?>">
+<input type="hidden" id="shift_id" name="shift_id" value="<?= $shift_id ?>">
 <div id="my_camera"></div>
 <div style="display: none;" id="my_result"></div>
 <button class="btn btn-primary mt-2" id="ambil-foto">Masuk</button>
@@ -48,7 +49,8 @@ crossorigin="anonymous" referrerpolicy="no-referrer"></script>
                 'foto_masuk=' + encodeURIComponent(data_uri) + 
                 '&id_pegawai=' + id +
                 '&tanggal_masuk=' + tanggal_masuk +
-                '&jam_masuk=' + jam_masuk
+                '&jam_masuk=' + jam_masuk +
+                '&shift_id=' + encodeURIComponent(document.getElementById('shift_id').value)
             );
 
     })

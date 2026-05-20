@@ -59,6 +59,7 @@ class Home extends BaseController
         $latitude_pegawai = (float) $this->request->getPost('latitude_pegawai');
         $latitude_outlet = (float) $this->request->getPost('latitude_outlet');
         $radius = $this->request->getPost('radius');
+        $shift_id = $this->request->getPost('shift_id');
 
         $jarak = sin(deg2rad($latitude_pegawai)) * sin(deg2rad($latitude_outlet)) + 
         cos(deg2rad($latitude_pegawai)) * cos(deg2rad($latitude_outlet));
@@ -71,17 +72,29 @@ class Home extends BaseController
         if($jarak_meter > $radius){
         session()->setFlashdata('gagal', 'Presensi anda gagal, anda berada diluar radius outlet');
         return redirect()->to(base_url('pegawai/home'));
-    } else{
+    }
+
+        $presensi_model = new PresensiModel();
+        $existing = $presensi_model
+            ->where('id_pegawai', $this->request->getPost('id_pegawai'))
+            ->where('tanggal_masuk', $this->request->getPost('tanggal_masuk'))
+            ->where('shift_id', $shift_id)
+            ->countAllResults();
+
+        if($existing > 0){
+            session()->setFlashdata('gagal', 'Anda telah melakukan presensi untuk shift yang sama hari ini');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
         $data = [
-    'title' => "Ambil Foto Selfie",
-    'id_pegawai' => $this->request->getPost('id_pegawai'),
-    'tanggal_masuk' => $this->request->getPost('tanggal_masuk'),
-    'jam_masuk' => $this->request->getPost('jam_masuk'),
-    'shift_id' => $this->request->getPost('shift_id'),
-];
+            'title' => "Ambil Foto Selfie",
+            'id_pegawai' => $this->request->getPost('id_pegawai'),
+            'tanggal_masuk' => $this->request->getPost('tanggal_masuk'),
+            'jam_masuk' => $this->request->getPost('jam_masuk'),
+            'shift_id' => $shift_id,
+        ];
 
         return view('pegawai/ambil_foto', $data);
-    }
     }
     public function presensi_masuk_aksi()
     {
