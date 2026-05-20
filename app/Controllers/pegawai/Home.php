@@ -40,13 +40,33 @@ class Home extends BaseController
             ->join('shifts', 'shifts.id = pegawai_shift.shift_id')
             ->where('pegawai_shift.pegawai_id', $id_pegawai)
             ->findAll();
-        
+
+        $today = date('Y-m-d');
+        $today_presensi = $presensi_model
+            ->where('id_pegawai', $id_pegawai)
+            ->where('tanggal_masuk', $today)
+            ->countAllResults();
+
+        $open_presensi = $presensi_model
+            ->where('id_pegawai', $id_pegawai)
+            ->where('tanggal_masuk', $today)
+            ->where('tanggal_keluar IS NULL', null, false)
+            ->countAllResults();
+
+        $ambil_presensi_masuk = $presensi_model
+            ->where('id_pegawai', $id_pegawai)
+            ->where('tanggal_masuk', $today)
+            ->where('tanggal_keluar IS NULL', null, false)
+            ->orderBy('id', 'DESC')
+            ->first();
+
         $data = [
             'title' => 'Home', 
             'lokasi_presensi' => $lokasi_presensi->where('id', $pegawai['lokasi_presensi'])->first(),
-            'cek_presensi' => $presensi_model->where('id_pegawai', $id_pegawai)->where('tanggal_masuk', date('Y-m-d'))->countAllResults(),
-            'cek_presensi_keluar' => $presensi_model->where('id_pegawai', $id_pegawai)->where('tanggal_masuk', date('Y-m-d'))->where('tanggal_keluar IS NOT NULL')->countAllResults(),
-            'ambil_presensi_masuk' => $presensi_model->where('id_pegawai', $id_pegawai)->where('tanggal_masuk', date('Y-m-d'))->first(),
+            'cek_presensi' => $today_presensi,
+            'open_presensi' => $open_presensi,
+            'cek_presensi_keluar' => $today_presensi - $open_presensi,
+            'ambil_presensi_masuk' => $ambil_presensi_masuk,
             'pegawai' => $pegawai,
             'shifts' => $shifts
         ];
@@ -127,6 +147,20 @@ class Home extends BaseController
 
     public function presensi_keluar($id)
     {
+        $id_pegawai = session()->get('id_pegawai');
+        $presensi_model = new PresensiModel();
+
+        $presensi = $presensi_model
+            ->where('id', $id)
+            ->where('id_pegawai', $id_pegawai)
+            ->where('tanggal_keluar IS NULL', null, false)
+            ->first();
+
+        if(!$presensi){
+            session()->setFlashdata('gagal', 'Data presensi tidak valid atau sudah keluar.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
         $latitude_pegawai = (float) $this->request->getPost('latitude_pegawai');
         $latitude_outlet = (float) $this->request->getPost('latitude_outlet');
         $radius = $this->request->getPost('radius');
@@ -139,28 +173,40 @@ class Home extends BaseController
         $km = $mil * 1.609344;
         $jarak_meter = floor ($km * 1000);
 
-        
         if($jarak_meter > $radius){
-        session()->setFlashdata('gagal', 'Presensi anda gagal, anda berada diluar radius outlet');
-        return redirect()->to(base_url('pegawai/home'));
-    } else{
+            session()->setFlashdata('gagal', 'Presensi anda gagal, anda berada diluar radius outlet');
+            return redirect()->to(base_url('pegawai/home'));
+        }
+
         $data = [
-    'title' => "Ambil Foto Selfie",
-    'id_presensi' => $id,
-    'tanggal_keluar' => $this->request->getPost('tanggal_keluar'),
-    'jam_keluar' => $this->request->getPost('jam_keluar'),
-];
+            'title' => "Ambil Foto Selfie",
+            'id_presensi' => $id,
+            'tanggal_keluar' => $this->request->getPost('tanggal_keluar'),
+            'jam_keluar' => $this->request->getPost('jam_keluar'),
+        ];
 
         return view('pegawai/ambil_foto_keluar', $data);
-    }
     }
 
     public function presensi_keluar_aksi($id)
     {
+        $id_pegawai = session()->get('id_pegawai');
         $request = \Config\Services::request();
         $tanggal_keluar = $request->getPost('tanggal_keluar');
         $jam_keluar = $request->getPost('jam_keluar');
         $foto_keluar = $request->getPost('foto_keluar');
+
+        $presensi_model = new PresensiModel();
+        $presensi = $presensi_model
+            ->where('id', $id)
+            ->where('id_pegawai', $id_pegawai)
+            ->where('tanggal_keluar IS NULL', null, false)
+            ->first();
+
+        if(!$presensi){
+            session()->setFlashdata('gagal', 'Data presensi tidak valid atau sudah keluar.');
+            return redirect()->to(base_url('pegawai/home'));
+        }
 
         $foto_keluar = str_replace('data:image/jpeg;base64,', '', $foto_keluar );
         $foto_keluar = base64_decode($foto_keluar);
@@ -169,12 +215,11 @@ class Home extends BaseController
         $nama_foto = $id . '_' . time() . '.jpg';
         file_put_contents($foto_dir, $foto_keluar);
 
-        $presensi_model = new PresensiModel();
         $presensi_model->update($id,[
             'tanggal_keluar' =>$tanggal_keluar,
             'jam_keluar' =>$jam_keluar,
             'foto_keluar' => $nama_foto
-           ]);
+        ]);
         session()->setFlashData('berhasil', 'Presensi Keluar Berhasil');
          return redirect()->to(base_url('pegawai/home')) ;
 

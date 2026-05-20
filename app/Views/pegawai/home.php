@@ -22,7 +22,7 @@
   <div class="col-md-4">
     <div class="card h-100">
       <div class="card-header">Presensi Masuk</div>
-      <?php if($cek_presensi < 1) : ?>
+      <?php if($open_presensi < 1) : ?>
     <div class="card-body text-center">
       <div class=" fw-bold"><?= date('d F Y') ?></div>
       <div class="parent-clock">
@@ -84,7 +84,7 @@
 
       <?php if($cek_presensi < 1) : ?>
          <div class="card-body"><h5 class="text-center">Anda Belum Melakukan Presensi Masuk</h5></div>
-      <?php elseif($cek_presensi_keluar > 0) : ?>
+      <?php elseif($open_presensi < 1) : ?>
         <div class="card-body"><h5 class="text-center">Anda Telah Melakukan Presensi Keluar
            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.5071 10.5245C15.8 10.2316 15.8 9.75674 15.5071 9.46384C15.2142 9.17095 14.7393 9.17095 14.4464 9.46384L10.9649 12.9454L9.55359 11.5341C9.2607 11.2412 8.78582 11.2412 8.49293 11.5341C8.20004 11.827 8.20004 12.3019 8.49294 12.5947L10.4346 14.5364C10.7275 14.8293 11.2023 14.8292 11.4952 14.5364L15.5071 10.5245Z" fill="#323544"/>
