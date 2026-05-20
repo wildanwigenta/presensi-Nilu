@@ -58,6 +58,7 @@
                 <td><?= $lokasi_presensi['jam_pulang'] ?></td>
             </tr>
         </table>
+        <a href="<?= base_url('admin/shifts/location/' . $lokasi_presensi['id']) ?>" class="btn btn-primary">Lihat Shift di Lokasi Ini</a>
     </div>
 </div>
     </div>
