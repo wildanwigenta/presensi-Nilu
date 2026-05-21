@@ -42,6 +42,7 @@ const OPEN_THRESHOLD = 0.22;
 const CLOSED_THRESHOLD = 0.15;
 let blinkState = 'init';
 let verifiedBlink = false;
+let autoCaptureTriggered = false;
 
 const camera = new Camera(videoElement, {
     onFrame: async () => {
@@ -94,8 +95,15 @@ function onResults(results) {
         }
 
         if (verifiedBlink) {
-            statusElement.textContent = 'Verifikasi berhasil, silakan klik Masuk';
+            statusElement.textContent = 'Verifikasi berhasil, mengambil foto...';
             document.getElementById('ambil-foto').disabled = false;
+            
+            if (!autoCaptureTriggered) {
+                autoCaptureTriggered = true;
+                setTimeout(() => {
+                    performCapture('masuk');
+                }, 500);
+            }
         } else if (isClosed) {
             statusElement.textContent = 'Mata tertutup';
             document.getElementById('ambil-foto').disabled = true;
@@ -116,7 +124,7 @@ function onResults(results) {
     }
 }
 
-document.getElementById('ambil-foto').addEventListener('click', function() {
+function performCapture(type) {
     canvasElement.width = videoElement.videoWidth || 320;
     canvasElement.height = videoElement.videoHeight || 240;
     canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
@@ -138,6 +146,10 @@ document.getElementById('ambil-foto').addEventListener('click', function() {
         '&jam_masuk=' + encodeURIComponent(document.getElementById('jam_masuk').value) +
         '&shift_id=' + encodeURIComponent(document.getElementById('shift_id').value)
     );
+}
+
+document.getElementById('ambil-foto').addEventListener('click', function() {
+    performCapture('masuk');
 });
 </script>
     

@@ -40,6 +40,7 @@ const OPEN_THRESHOLD = 0.22;
 const CLOSED_THRESHOLD = 0.15;
 let blinkState = 'init';
 let verifiedBlink = false;
+let autoCaptureTriggered = false;
 
 const camera = new Camera(videoElement, {
     onFrame: async () => {
@@ -92,8 +93,15 @@ function onResults(results) {
         }
 
         if (verifiedBlink) {
-            statusElement.textContent = 'Verifikasi berhasil, silakan klik Keluar';
+            statusElement.textContent = 'Verifikasi berhasil, mengambil foto...';
             document.getElementById('ambil-foto-keluar').disabled = false;
+            
+            if (!autoCaptureTriggered) {
+                autoCaptureTriggered = true;
+                setTimeout(() => {
+                    performCapture('keluar');
+                }, 500);
+            }
         } else if (isClosed) {
             statusElement.textContent = 'Mata tertutup';
             document.getElementById('ambil-foto-keluar').disabled = true;
@@ -114,7 +122,7 @@ function onResults(results) {
     }
 }
 
-document.getElementById('ambil-foto-keluar').addEventListener('click', function() {
+function performCapture(type) {
     canvasElement.width = videoElement.videoWidth || 320;
     canvasElement.height = videoElement.videoHeight || 240;
     canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
@@ -134,6 +142,10 @@ document.getElementById('ambil-foto-keluar').addEventListener('click', function(
         '&tanggal_keluar=' + encodeURIComponent(document.getElementById('tanggal_keluar').value) +
         '&jam_keluar=' + encodeURIComponent(document.getElementById('jam_keluar').value)
     );
+}
+
+document.getElementById('ambil-foto-keluar').addEventListener('click', function() {
+    performCapture('keluar');
 });
 </script>
     
