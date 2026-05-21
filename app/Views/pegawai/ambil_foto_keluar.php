@@ -12,15 +12,14 @@
 <canvas id="capture_canvas" style="display:none;"></canvas>
 <button class="btn btn-danger mt-2" id="ambil-foto-keluar" disabled>Keluar</button>
 
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
-<script>
+// Cache DOM elements to prevent repeated queries during realtime processing
 const videoElement = document.getElementById('webcam');
 const statusElement = document.getElementById('status');
 const canvasElement = document.getElementById('capture_canvas');
+const buttonElement = document.getElementById('ambil-foto-keluar');
 const canvasCtx = canvasElement.getContext('2d');
 
+// Initialize MediaPipe FaceMesh
 const faceMesh = new FaceMesh({
     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
 });
@@ -29,47 +28,73 @@ faceMesh.setOptions({
     minDetectionConfidence: 0.5,
     minTrackingConfidence: 0.5
 });
-faceMesh.onResults(onResults);
 
-let leftEyeLandmarks = [];
-let rightEyeLandmarks = [];
+// Eye landmark indices for left and right eyes (8 points each)
 const leftEyeIndices = [33, 133, 159, 145, 153, 144, 163, 154];
 const rightEyeIndices = [362, 263, 386, 374, 380, 373, 390, 381];
 
-const OPEN_THRESHOLD = 0.22;
-const CLOSED_THRESHOLD = 0.15;
-let blinkState = 'init';
-let verifiedBlink = false;
-let autoCaptureTriggered = false;
+// Blink detection thresholds and state variables
+const OPEN_THRESHOLD = 0.22;     // EAR threshold for open eye
+const CLOSED_THRESHOLD = 0.15;   // EAR threshold for closed eye
+const BLINK_FRAME_THRESHOLD = 3; // Minimum frames required to confirm state change (debouncing)
 
-const camera = new Camera(videoElement, {
+let leftEyeLandmarks = [];
+let rightEyeLandmarks = [];
+let blinkState = 'init';           // State machine: init | open_seen | closed_seen
+let verifiedBlink = false;         // Verification status
+let autoCaptureTriggered = false;  // Prevent multiple auto-capture attempts
+let openFrameCount = 0;            // Frame counter for debouncing open state
+let closedFrameCount = 0;          // Frame counter for debouncing closed state
+let cameraInitialized = false;     // Track camera initialization
+let cameraInstance = null;         // Store camera instance for cleanup
+
+// Video constraints optimized for both desktop and mobile
+const videoConstraints = {
     onFrame: async () => {
-        await faceMesh.send({image: videoElement});
+        if (cameraInitialized && faceMesh) {
+            await faceMesh.send({image: videoElement});
+        }
     },
-    width: 320,
-    height: 240
-});
-camera.start();
+    width: {ideal: 320},
+    height: {ideal: 240},
+    facingMode: 'user'  // Mobile compatibility
+};
+
+// Initialize camera with error handling
+try {
+    cameraInstance = new Camera(videoElement, videoConstraints);
+    faceMesh.onResults(onResults);
+    cameraInstance.start();
+    cameraInitialized = true;
+} catch (error) {
+    statusElement.textContent = 'Error: Kamera tidak dapat diakses. Periksa izin kamera browser.';
+    console.error('Camera initialization error:', error);
+    buttonElement.disabled = true;
+}
 
 function distance(a, b) {
     return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+// Calculate Eye Aspect Ratio (EAR) for determining eye open/closed state
 function eyeAspectRatio(eye) {
     if (eye.length !== 8) return 0;
-    const horizontal = distance(eye[0], eye[1]) || 1;
-    const vertical1 = distance(eye[2], eye[3]);
-    const vertical2 = distance(eye[6], eye[5]);
-    const vertical3 = distance(eye[7], eye[4]);
+    const horizontal = distance(eye[0], eye[1]) || 1; // Horizontal distance between eye corners
+    const vertical1 = distance(eye[2], eye[3]);       // First vertical distance
+    const vertical2 = distance(eye[6], eye[5]);       // Second vertical distance
+    const vertical3 = distance(eye[7], eye[4]);       // Third vertical distance
+    // EAR formula: (vertical1 + vertical2 + vertical3) / (3 * horizontal)
     return (vertical1 + vertical2 + vertical3) / (3 * horizontal);
 }
 
+// Calculate average EAR from both eyes
 function getAverageEAR() {
     const leftEAR = eyeAspectRatio(leftEyeLandmarks);
     const rightEAR = eyeAspectRatio(rightEyeLandmarks);
     return (leftEAR + rightEAR) / 2;
 }
 
+// Process MediaPipe FaceMesh results with improved false-positive detection
 function onResults(results) {
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
         const landmarks = results.multiFaceLandmarks[0];
@@ -80,21 +105,35 @@ function onResults(results) {
         const isOpen = averageEAR > OPEN_THRESHOLD;
         const isClosed = averageEAR < CLOSED_THRESHOLD;
 
+        // Debouncing: require multiple consecutive frames to confirm state change
+        if (isOpen) {
+            openFrameCount++;
+            closedFrameCount = 0;
+        } else if (isClosed) {
+            closedFrameCount++;
+            openFrameCount = 0;
+        } else {
+            openFrameCount = 0;
+            closedFrameCount = 0;
+        }
+
+        // State machine: init → open_seen → closed_seen → verified
         if (!verifiedBlink) {
-            if (isOpen && blinkState === 'init') {
+            if (openFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'init') {
                 blinkState = 'open_seen';
             }
-            if (isOpen && blinkState === 'closed_seen') {
+            if (openFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'closed_seen') {
                 verifiedBlink = true;
             }
-            if (isClosed && blinkState === 'open_seen') {
+            if (closedFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'open_seen') {
                 blinkState = 'closed_seen';
             }
         }
 
+        // Update UI based on verification state
         if (verifiedBlink) {
             statusElement.textContent = 'Verifikasi berhasil, mengambil foto...';
-            document.getElementById('ambil-foto-keluar').disabled = false;
+            buttonElement.disabled = false;
             
             if (!autoCaptureTriggered) {
                 autoCaptureTriggered = true;
@@ -104,21 +143,24 @@ function onResults(results) {
             }
         } else if (isClosed) {
             statusElement.textContent = 'Mata tertutup';
-            document.getElementById('ambil-foto-keluar').disabled = true;
+            buttonElement.disabled = true;
         } else if (isOpen) {
             statusElement.textContent = 'Mata terbuka';
-            document.getElementById('ambil-foto-keluar').disabled = true;
+            buttonElement.disabled = true;
         } else {
             statusElement.textContent = 'Wajah terdeteksi, silakan berkedip';
-            document.getElementById('ambil-foto-keluar').disabled = true;
+            buttonElement.disabled = true;
         }
     } else {
+        // Face not detected: reset all states
         statusElement.textContent = 'Wajah tidak terdeteksi';
         leftEyeLandmarks = [];
         rightEyeLandmarks = [];
         blinkState = 'init';
         verifiedBlink = false;
-        document.getElementById('ambil-foto-keluar').disabled = true;
+        openFrameCount = 0;
+        closedFrameCount = 0;
+        buttonElement.disabled = true;
     }
 }
 
@@ -144,8 +186,23 @@ function performCapture(type) {
     );
 }
 
-document.getElementById('ambil-foto-keluar').addEventListener('click', function() {
-    performCapture('keluar');
+// Manual capture event listener
+buttonElement.addEventListener('click', function() {
+    if (verifiedBlink) {
+        performCapture('keluar');
+    }
+});
+
+// Cleanup resources when page unloads (prevent memory leaks)
+window.addEventListener('beforeunload', function() {
+    if (cameraInstance) {
+        try {
+            cameraInstance.stop();
+            cameraInitialized = false;
+        } catch (error) {
+            console.warn('Error stopping camera:', error);
+        }
+    }
 });
 </script>
     
