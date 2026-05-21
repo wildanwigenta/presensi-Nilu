@@ -12,6 +12,10 @@
 <canvas id="capture_canvas" style="display:none;"></canvas>
 <button class="btn btn-danger mt-2" id="ambil-foto-keluar" disabled>Keluar</button>
 
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script>
 // Cache DOM elements to prevent repeated queries during realtime processing
 const videoElement = document.getElementById('webcam');
 const statusElement = document.getElementById('status');
@@ -34,9 +38,13 @@ const leftEyeIndices = [33, 133, 159, 145, 153, 144, 163, 154];
 const rightEyeIndices = [362, 263, 386, 374, 380, 373, 390, 381];
 
 // Blink detection thresholds and state variables
-const OPEN_THRESHOLD = 0.22;     // EAR threshold for open eye
-const CLOSED_THRESHOLD = 0.15;   // EAR threshold for closed eye
-const BLINK_FRAME_THRESHOLD = 3; // Minimum frames required to confirm state change (debouncing)
+// const OPEN_THRESHOLD = 0.22;     // EAR threshold for open eye
+// const CLOSED_THRESHOLD = 0.15;   // EAR threshold for closed eye
+// const BLINK_FRAME_THRESHOLD = 3; // Minimum frames required to confirm state change (debouncing)
+
+const OPEN_THRESHOLD = 0.20;
+const CLOSED_THRESHOLD = 0.18;
+const BLINK_FRAME_THRESHOLD = 2;
 
 let leftEyeLandmarks = [];
 let rightEyeLandmarks = [];
@@ -118,14 +126,14 @@ function onResults(results) {
 
         // State machine: init → open_seen → closed_seen → verified
         if (!verifiedBlink) {
-            if (openFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'init') {
+            if (blinkState === 'init' && openFrameCount >= BLINK_FRAME_THRESHOLD) {
                 blinkState = 'open_seen';
             }
-            if (openFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'closed_seen') {
-                verifiedBlink = true;
-            }
-            if (closedFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'open_seen') {
+            if (blinkState === 'open_seen' && closedFrameCount >= BLINK_FRAME_THRESHOLD) {
                 blinkState = 'closed_seen';
+            }
+            if (blinkState === 'closed_seen' && openFrameCount >= BLINK_FRAME_THRESHOLD) {
+                verifiedBlink = true;
             }
         }
 
@@ -133,16 +141,21 @@ function onResults(results) {
         if (verifiedBlink) {
             statusElement.textContent = 'Verifikasi berhasil, silakan klik Keluar';
             buttonElement.disabled = false;
+        } else if (blinkState === 'closed_seen') {
+            statusElement.textContent = 'Kedipan terdeteksi, buka mata kembali...';
         } else if (isClosed) {
-            statusElement.textContent = 'Mata tertutup';
+            statusElement.textContent = ' Mata tertutup terdeteksi';
             buttonElement.disabled = true;
         } else if (isOpen) {
-            statusElement.textContent = 'Mata terbuka';
+            statusElement.textContent = blinkState === 'init' 
+                ? 'Mata terbuka — silakan kedipkan mata' 
+                : 'Mata terbuka...';
             buttonElement.disabled = true;
         } else {
             statusElement.textContent = 'Wajah terdeteksi, silakan berkedip';
             buttonElement.disabled = true;
         }
+
     } else {
         // Face not detected: reset all states
         statusElement.textContent = 'Wajah tidak terdeteksi';

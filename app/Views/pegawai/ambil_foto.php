@@ -146,7 +146,7 @@ function onResults(results) {
         } else if (blinkState === 'closed_seen') {
             statusElement.textContent = 'Kedipan terdeteksi, buka mata kembali...';
         } else if (isClosed) {
-            statusElement.textContent = '✓ Mata tertutup terdeteksi';
+            statusElement.textContent = ' Mata tertutup terdeteksi';
             buttonElement.disabled = true;
         } else if (isOpen) {
             statusElement.textContent = blinkState === 'init' 
