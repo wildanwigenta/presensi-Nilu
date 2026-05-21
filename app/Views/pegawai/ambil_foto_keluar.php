@@ -31,6 +31,11 @@ faceMesh.setOptions({
 });
 faceMesh.onResults(onResults);
 
+let leftEyeLandmarks = [];
+let rightEyeLandmarks = [];
+const leftEyeIndices = [33, 133, 159, 145, 153, 144, 163, 154];
+const rightEyeIndices = [362, 263, 386, 374, 380, 373, 390, 381];
+
 const camera = new Camera(videoElement, {
     onFrame: async () => {
         await faceMesh.send({image: videoElement});
@@ -43,8 +48,13 @@ camera.start();
 function onResults(results) {
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
         statusElement.textContent = 'Wajah terdeteksi';
+        const landmarks = results.multiFaceLandmarks[0];
+        leftEyeLandmarks = leftEyeIndices.map(index => landmarks[index]);
+        rightEyeLandmarks = rightEyeIndices.map(index => landmarks[index]);
     } else {
         statusElement.textContent = 'Wajah tidak terdeteksi';
+        leftEyeLandmarks = [];
+        rightEyeLandmarks = [];
     }
 }
 
