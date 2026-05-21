@@ -3,11 +3,12 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\PegawaiModel;
 use App\Models\UserModel;
 use App\Models\LokasiPresensiModel;
 use App\Models\JabatanModel;
+use App\Models\ShiftModel;
+use App\Models\PegawaiShiftModel;
 
 class DataPegawai extends BaseController
 {
@@ -49,10 +50,19 @@ class DataPegawai extends BaseController
     {
         $lokasi_presensi = new LokasiPresensiModel();
         $jabatan_model = new JabatanModel();
+        $shiftModel = new ShiftModel();
+        $shifts = $shiftModel
+            ->select('shifts.*, lokasi_presensi.nama_lokasi')
+            ->join('lokasi_presensi', 'lokasi_presensi.id = shifts.lokasi_presensi_id')
+            ->orderBy('lokasi_presensi.nama_lokasi', 'ASC')
+            ->orderBy('shifts.nama_shift', 'ASC')
+            ->findAll();
+
         $data = [
             'title' => 'Tambah Pegawai',
             'lokasi_presensi' => $lokasi_presensi->findAll(),
             'jabatan' => $jabatan_model->orderBy('jabatan', 'ASC')->findAll(),
+            'shifts' => $shifts,
             'validation' => \Config\Services::validation()
         ];
         return view('admin/data_pegawai/create', $data);
@@ -137,16 +147,25 @@ class DataPegawai extends BaseController
         if(!$this->validate($rules)) {
             $lokasi_presensi = new LokasiPresensiModel();
             $jabatan_model = new JabatanModel();
+            $shiftModel = new ShiftModel();
+            $shifts = $shiftModel
+                ->select('shifts.*, lokasi_presensi.nama_lokasi')
+                ->join('lokasi_presensi', 'lokasi_presensi.id = shifts.lokasi_presensi_id')
+                ->orderBy('lokasi_presensi.nama_lokasi', 'ASC')
+                ->orderBy('shifts.nama_shift', 'ASC')
+                ->findAll();
             $data = [
                 'title' => 'Tambah Pegawai',
                 'lokasi_presensi' => $lokasi_presensi->findAll(),
                 'jabatan' => $jabatan_model->orderBy('jabatan', 'ASC')->findAll(),
+                'shifts' => $shifts,
                 'validation' => $this->validator
             ];
             return view('admin/data_pegawai/create', $data);
         } else {
             $pegawaiModel = new PegawaiModel();
             $nipBaru = $this->generateNIP();
+            $shiftModel = new ShiftModel();
 
             $foto = $this->request->getFile('foto');
             if($foto->getError() == 4){
@@ -179,6 +198,28 @@ class DataPegawai extends BaseController
                 'status' => 'Aktif',
                 'role' => $this->request->getPost('role'),
             ]);
+
+            $pegawaiShiftModel = new PegawaiShiftModel();
+            $selectedShifts = $this->request->getPost('shift_ids');
+            if (!is_array($selectedShifts)) {
+                $selectedShifts = [];
+            }
+            $selectedShifts = array_filter(array_unique(array_map('intval', $selectedShifts)));
+
+            if (!empty($selectedShifts)) {
+                $validShifts = $shiftModel->whereIn('id', $selectedShifts)->countAllResults();
+                if ($validShifts !== count($selectedShifts)) {
+                    session()->setFlashData('gagal', 'Pilihan shift tidak valid.');
+                    return redirect()->back()->withInput();
+                }
+            }
+
+            foreach ($selectedShifts as $shiftId) {
+                $pegawaiShiftModel->insert([
+                    'pegawai_id' => $id_pegawai,
+                    'shift_id' => $shiftId,
+                ]);
+            }
             
             session()->setFlashData('berhasil', 'Data Pegawai Berhasil Disimpan');
             return redirect()->to(base_url('admin/data_pegawai'));
@@ -200,11 +241,28 @@ class DataPegawai extends BaseController
         $lokasi_presensi = new LokasiPresensiModel();
         $jabatan_model = new JabatanModel();
         $pegawaiModel = new PegawaiModel();
+        $shiftModel = new ShiftModel();
+        $pegawaiShiftModel = new PegawaiShiftModel();
+
+        $assignedShifts = $pegawaiShiftModel->where('pegawai_id', $id)->findAll();
+        $assignedShiftIds = array_map(function($item) {
+            return $item['shift_id'];
+        }, $assignedShifts);
+
+        $shifts = $shiftModel
+            ->select('shifts.*, lokasi_presensi.nama_lokasi')
+            ->join('lokasi_presensi', 'lokasi_presensi.id = shifts.lokasi_presensi_id')
+            ->orderBy('lokasi_presensi.nama_lokasi', 'ASC')
+            ->orderBy('shifts.nama_shift', 'ASC')
+            ->findAll();
+
         $data = [
             'title' => 'Edit Data Pegawai',
             'pegawai' => $pegawaiModel->editPegawai($id),
             'lokasi_presensi' => $lokasi_presensi->findAll(),
             'jabatan' => $jabatan_model->orderBy('jabatan', 'ASC')->findAll(),
+            'shifts' => $shifts,
+            'assigned_shift_ids' => $assignedShiftIds,
             'validation' => \Config\Services::validation()
         ];
         return view('admin/data_pegawai/edit', $data);
@@ -273,18 +331,35 @@ class DataPegawai extends BaseController
         if(!$this->validate($rules)) {
             $lokasi_presensi = new LokasiPresensiModel();
             $jabatan_model = new JabatanModel();
-            $pegawaiModel = new PegawaiModel();
+            $shiftModel = new ShiftModel();
+            $pegawaiShiftModel = new PegawaiShiftModel();
+
+            $assignedShifts = $pegawaiShiftModel->where('pegawai_id', $id)->findAll();
+            $assignedShiftIds = array_map(function($item) {
+                return $item['shift_id'];
+            }, $assignedShifts);
+
+            $shifts = $shiftModel
+                ->select('shifts.*, lokasi_presensi.nama_lokasi')
+                ->join('lokasi_presensi', 'lokasi_presensi.id = shifts.lokasi_presensi_id')
+                ->orderBy('lokasi_presensi.nama_lokasi', 'ASC')
+                ->orderBy('shifts.nama_shift', 'ASC')
+                ->findAll();
+
             $data = [
                 'title' => 'Edit Data Pegawai',
                 'pegawai' => $pegawaiModel->editPegawai($id),
                 'lokasi_presensi' => $lokasi_presensi->findAll(),
                 'jabatan' => $jabatan_model->orderBy('jabatan', 'ASC')->findAll(),
+                'shifts' => $shifts,
+                'assigned_shift_ids' => $assignedShiftIds,
                 'validation' => $this->validator
             ];
             return view('admin/data_pegawai/edit', $data);
         } else {
             $pegawaiModel = new PegawaiModel();
             $userModel = new UserModel();
+            $shiftModel = new ShiftModel();
 
             $foto = $this->request->getFile('foto');
 
@@ -311,15 +386,41 @@ class DataPegawai extends BaseController
                 $password = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
             }
 
+            $currentUser = $userModel->where('id_pegawai', $id)->first();
+            $status = $this->request->getPost('status') ?? ($currentUser['status'] ?? 'Aktif');
+
             $userModel
                 ->where('id_pegawai', $id)
                 ->set([
                     'username' => $this->request->getPost('username'),
                     'password' => $password,
-                    'status' => $this->request->getPost('status'),
+                    'status' => $status,
                     'role' => $this->request->getPost('role'), 
                 ])
                 ->update();
+
+            $pegawaiShiftModel = new PegawaiShiftModel();
+            $selectedShifts = $this->request->getPost('shift_ids');
+            if (!is_array($selectedShifts)) {
+                $selectedShifts = [];
+            }
+            $selectedShifts = array_filter(array_unique(array_map('intval', $selectedShifts)));
+
+            if (!empty($selectedShifts)) {
+                $validShifts = $shiftModel->whereIn('id', $selectedShifts)->countAllResults();
+                if ($validShifts !== count($selectedShifts)) {
+                    session()->setFlashData('gagal', 'Pilihan shift tidak valid.');
+                    return redirect()->back()->withInput();
+                }
+            }
+
+            $pegawaiShiftModel->where('pegawai_id', $id)->delete();
+            foreach ($selectedShifts as $shiftId) {
+                $pegawaiShiftModel->insert([
+                    'pegawai_id' => $id,
+                    'shift_id' => $shiftId,
+                ]);
+            }
 
             session()->setFlashData('berhasil', 'Data pegawai Berhasil Diupdate');
             return redirect()->to(base_url('admin/data_pegawai'));

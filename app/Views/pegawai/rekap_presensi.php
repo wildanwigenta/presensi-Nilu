@@ -21,6 +21,7 @@
             <tr>
                 <th>No</th>
                 <th>Nama Pegawai</th>
+                <th>Shift</th>
                 <th>Tanggal</th>
                 <th>Jam Masuk</th>
                 <th>Jam Keluar</th>
@@ -67,6 +68,7 @@
                     <tr>
                         <td><?= $no++ ?></td>
                         <td><?= esc($rekap['nama']) ?></td>
+                        <td><?= esc($rekap['nama_shift'] ?? '-') ?></td>
                         <td><?= date('d F Y', strtotime($rekap['tanggal_masuk'])) ?></td>
                         <td><?= esc($rekap['jam_masuk']) ?></td>
                         <td><?= esc($rekap['jam_keluar']) ?></td>
@@ -76,7 +78,7 @@
                 <?php endforeach; ?>
             <?php else : ?>
                 <tr>
-                    <td colspan="7" class="text-center">Tidak ada data presensi</td>
+                    <td colspan="8" class="text-center">Tidak ada data presensi</td>
                 </tr>
             <?php endif; ?>
         </tbody>

@@ -12,6 +12,7 @@ class PresensiModel extends Model
         'id_pegawai',
         'tanggal_masuk',
         'jam_masuk',
+        'shift_id',
         'foto_masuk',
         'tanggal_keluar',
         'jam_keluar',
@@ -21,8 +22,9 @@ class PresensiModel extends Model
     public function rekap_harian(){
         $db      = \Config\Database::connect();
         $builder = $db->table('presensi');
-        $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
+        $builder->select('presensi.*, pegawai.nama, shifts.nama_shift as nama_shift, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
+        $builder->join('shifts', 'shifts.id = presensi.shift_id', 'left');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
         $builder->where('tanggal_masuk', date('Y-m-d'));
         return $builder->get()->getResultArray();
@@ -31,8 +33,9 @@ class PresensiModel extends Model
     public function rekap_harian_filter($filter_tanggal){
         $db      = \Config\Database::connect();
         $builder = $db->table('presensi');
-        $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
+        $builder->select('presensi.*, pegawai.nama, shifts.nama_shift as nama_shift, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
+        $builder->join('shifts', 'shifts.id = presensi.shift_id', 'left');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
         $builder->where('tanggal_masuk', $filter_tanggal);
         return $builder->get()->getResultArray();
@@ -41,8 +44,9 @@ class PresensiModel extends Model
      public function rekap_bulanan_filter($filter_bulan, $filter_tahun){
         $db      = \Config\Database::connect();
         $builder = $db->table('presensi');
-        $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
+        $builder->select('presensi.*, pegawai.nama, shifts.nama_shift as nama_shift, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
+        $builder->join('shifts', 'shifts.id = presensi.shift_id', 'left');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
         $builder->where('MONTH(tanggal_masuk)',$filter_bulan);
         $builder->where('YEAR(tanggal_masuk)', $filter_tahun);
@@ -52,33 +56,40 @@ class PresensiModel extends Model
     public function rekap_bulanan(){
         $db      = \Config\Database::connect();
         $builder = $db->table('presensi');
-        $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
+        $builder->select('presensi.*, pegawai.nama, shifts.nama_shift as nama_shift, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
+        $builder->join('shifts', 'shifts.id = presensi.shift_id', 'left');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
         $builder->where('MONTH(tanggal_masuk)', date('m'));
         $builder->where('YEAR(tanggal_masuk)', date('Y'));
         return $builder->get()->getResultArray();
             }
 
-    public function rekap_presensi_pegawai(){
-        $id_pegawai = session()->get('id_pegawai');
+    public function rekap_presensi_pegawai($id_pegawai = null){
+        if ($id_pegawai === null) {
+            $id_pegawai = session()->get('id_pegawai');
+        }
         $db      = \Config\Database::connect();
         $builder = $db->table('presensi');
-        $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
+        $builder->select('presensi.*, pegawai.nama, shifts.nama_shift as nama_shift, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
+        $builder->join('shifts', 'shifts.id = presensi.shift_id', 'left');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
-        $builder->where('id_Pegawai', $id_pegawai);
+        $builder->where('id_pegawai', $id_pegawai);
         return $builder->get()->getResultArray();
             }
 
-    public function rekap_presensi_pegawai_filter($filter_tanggal){
-        $id_pegawai = session()->get('id_pegawai');
+    public function rekap_presensi_pegawai_filter($filter_tanggal, $id_pegawai = null){
+        if ($id_pegawai === null) {
+            $id_pegawai = session()->get('id_pegawai');
+        }
         $db      = \Config\Database::connect();
         $builder = $db->table('presensi');
-        $builder->select('presensi.*, pegawai.nama, lokasi_presensi.jam_masuk as jam_masuk_kantor');
+        $builder->select('presensi.*, pegawai.nama, shifts.nama_shift as nama_shift, lokasi_presensi.jam_masuk as jam_masuk_kantor');
         $builder->join('pegawai', 'pegawai.id = presensi.id_pegawai');
+        $builder->join('shifts', 'shifts.id = presensi.shift_id', 'left');
         $builder->join('lokasi_presensi', 'lokasi_presensi.id = pegawai.lokasi_presensi');
-        $builder->where('id_Pegawai', $id_pegawai);
+        $builder->where('id_pegawai', $id_pegawai);
         $builder->where('tanggal_masuk', $filter_tanggal);
         return $builder->get()->getResultArray();
             }

@@ -71,9 +71,9 @@ class RekapPresensi extends BaseController
         // Header tabel
         $activeWorksheet->setCellValue('A6', 'NO');
         $activeWorksheet->setCellValue('B6', 'NAMA PEGAWAI');
-        $activeWorksheet->setCellValue('C6', 'TANGGAL MASUK');
-        $activeWorksheet->setCellValue('D6', 'JAM MASUK');
-        $activeWorksheet->setCellValue('E6', 'TANGGAL KELUAR');
+        $activeWorksheet->setCellValue('C6', 'SHIFT');
+        $activeWorksheet->setCellValue('D6', 'TANGGAL MASUK');
+        $activeWorksheet->setCellValue('E6', 'JAM MASUK');
         $activeWorksheet->setCellValue('F6', 'JAM KELUAR');
         $activeWorksheet->setCellValue('G6', 'TOTAL JAM KERJA');
         $activeWorksheet->setCellValue('H6', 'TOTAL TERLAMBAT');
@@ -132,9 +132,9 @@ class RekapPresensi extends BaseController
             
             $activeWorksheet->setCellValue('A' . $rows, $no++);
             $activeWorksheet->setCellValue('B' . $rows, $rekap['nama']);
-            $activeWorksheet->setCellValue('C' . $rows, $rekap['tanggal_masuk']);
-            $activeWorksheet->setCellValue('D' . $rows, $rekap['jam_masuk']);
-            $activeWorksheet->setCellValue('E' . $rows, $rekap['tanggal_keluar']);
+            $activeWorksheet->setCellValue('C' . $rows, $rekap['nama_shift'] ?? '-');
+            $activeWorksheet->setCellValue('D' . $rows, $rekap['tanggal_masuk']);
+            $activeWorksheet->setCellValue('E' . $rows, $rekap['jam_masuk']);
             $activeWorksheet->setCellValue('F' . $rows, $rekap['jam_keluar']);
             $activeWorksheet->setCellValue('G' . $rows, $total_jam_kerja);
             $activeWorksheet->setCellValue('H' . $rows, $total_terlambat);
@@ -223,9 +223,9 @@ class RekapPresensi extends BaseController
         // Header tabel
         $activeWorksheet->setCellValue('A6', 'NO');
         $activeWorksheet->setCellValue('B6', 'NAMA PEGAWAI');
-        $activeWorksheet->setCellValue('C6', 'TANGGAL MASUK');
-        $activeWorksheet->setCellValue('D6', 'JAM MASUK');
-        $activeWorksheet->setCellValue('E6', 'TANGGAL KELUAR');
+        $activeWorksheet->setCellValue('C6', 'SHIFT');
+        $activeWorksheet->setCellValue('D6', 'TANGGAL MASUK');
+        $activeWorksheet->setCellValue('E6', 'JAM MASUK');
         $activeWorksheet->setCellValue('F6', 'JAM KELUAR');
         $activeWorksheet->setCellValue('G6', 'TOTAL JAM KERJA');
         $activeWorksheet->setCellValue('H6', 'TOTAL TERLAMBAT');
@@ -284,9 +284,9 @@ class RekapPresensi extends BaseController
             
             $activeWorksheet->setCellValue('A' . $rows, $no++);
             $activeWorksheet->setCellValue('B' . $rows, $rekap['nama']);
-            $activeWorksheet->setCellValue('C' . $rows, $rekap['tanggal_masuk']);
-            $activeWorksheet->setCellValue('D' . $rows, $rekap['jam_masuk']);
-            $activeWorksheet->setCellValue('E' . $rows, $rekap['tanggal_keluar']);
+            $activeWorksheet->setCellValue('C' . $rows, $rekap['nama_shift'] ?? '-');
+            $activeWorksheet->setCellValue('D' . $rows, $rekap['tanggal_masuk']);
+            $activeWorksheet->setCellValue('E' . $rows, $rekap['jam_masuk']);
             $activeWorksheet->setCellValue('F' . $rows, $rekap['jam_keluar']);
             $activeWorksheet->setCellValue('G' . $rows, $total_jam_kerja);
             $activeWorksheet->setCellValue('H' . $rows, $total_terlambat);

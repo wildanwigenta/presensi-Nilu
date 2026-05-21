@@ -26,6 +26,14 @@ $routes->post('admin/lokasi_presensi/update/(:segment)', 'admin\LokasiPresensi::
 $routes->get('admin/lokasi_presensi/delete/(:segment)', 'admin\LokasiPresensi::delete/$1', ['filter' => 'adminFilter']);
 $routes->get('admin/lokasi_presensi/detail/(:segment)', 'admin\LokasiPresensi::detail/$1', ['filter' => 'adminFilter']);
 
+$routes->get('admin/shifts', 'admin\Shifts::index', ['filter' => 'adminFilter']);
+$routes->get('admin/shifts/location/(:segment)', 'admin\Shifts::location/$1', ['filter' => 'adminFilter']);
+$routes->get('admin/shifts/create', 'admin\Shifts::create', ['filter' => 'adminFilter']);
+$routes->get('admin/shifts/create/(:segment)', 'admin\Shifts::create/$1', ['filter' => 'adminFilter']);
+$routes->post('admin/shifts/store', 'admin\Shifts::store', ['filter' => 'adminFilter']);
+$routes->get('admin/shifts/edit/(:segment)', 'admin\Shifts::edit/$1', ['filter' => 'adminFilter']);
+$routes->post('admin/shifts/update/(:segment)', 'admin\Shifts::update/$1', ['filter' => 'adminFilter']);
+$routes->get('admin/shifts/delete/(:segment)', 'admin\Shifts::delete/$1', ['filter' => 'adminFilter']);
 
 $routes->get('admin/data_pegawai', 'admin\DataPegawai::index', ['filter' => 'adminFilter']);
 $routes->get('admin/data_pegawai/create', 'admin\DataPegawai::create', ['filter' => 'adminFilter']);
