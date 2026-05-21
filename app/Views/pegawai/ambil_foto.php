@@ -2,62 +2,77 @@
 
 <?= $this->section('content') ?>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js" 
-integrity="sha512-dQIiHSl2hr3NWKKLycPndtpbh5iaHLo6MwrXm7F0FM5e+kL2U16oE9uIwPHUl6fQBeCthiEuV/rzP3MiAB8Vfw==" 
-crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 <input type="hidden" id="id_pegawai" name="id_pegawai" value="<?= $id_pegawai ?>">
 <input type="hidden" id="tanggal_masuk" name="tanggal_masuk" value="<?= $tanggal_masuk ?>">
 <input type="hidden" id="jam_masuk" name="jam_masuk" value="<?= $jam_masuk ?>">
 <input type="hidden" id="shift_id" name="shift_id" value="<?= $shift_id ?>">
-<div id="my_camera"></div>
+<div class="mb-3">
+  <video id="webcam" autoplay playsinline style="width:320px;height:240px;border:1px solid #ccc;"></video>
+  <div id="status" class="mt-2">Memuat kamera...</div>
+</div>
 <div style="display: none;" id="my_result"></div>
+<canvas id="capture_canvas" style="display:none;"></canvas>
 <button class="btn btn-primary mt-2" id="ambil-foto">Masuk</button>
 
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
 <script>
-    Webcam.set({
-        width: 320,
-        height: 240,
-        dest_width: 320,
-        dest_height: 240,
-        image_format: 'jpeg',
-        jpeg_quality: 90,
-        force_flash: false
-    });
+const videoElement = document.getElementById('webcam');
+const statusElement = document.getElementById('status');
+const canvasElement = document.getElementById('capture_canvas');
+const canvasCtx = canvasElement.getContext('2d');
 
-    Webcam.attach('#my_camera');
+const faceMesh = new FaceMesh({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+});
+faceMesh.setOptions({
+    maxNumFaces: 1,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+});
+faceMesh.onResults(onResults);
 
-    document.getElementById('ambil-foto').addEventListener('click', function(){
-        let id = document.getElementById('id_pegawai').value;
-        let tanggal_masuk = document.getElementById('tanggal_masuk').value;
-        let jam_masuk = document.getElementById('jam_masuk').value;
-        console.log(tanggal_masuk);
+const camera = new Camera(videoElement, {
+    onFrame: async () => {
+        await faceMesh.send({image: videoElement});
+    },
+    width: 320,
+    height: 240
+});
+camera.start();
 
-    Webcam.snap(function(data_uri){
+function onResults(results) {
+    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+        statusElement.textContent = 'Wajah terdeteksi';
+    } else {
+        statusElement.textContent = 'Wajah tidak terdeteksi';
+    }
+}
+
+document.getElementById('ambil-foto').addEventListener('click', function() {
+    canvasElement.width = videoElement.videoWidth || 320;
+    canvasElement.height = videoElement.videoHeight || 240;
+    canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+    const data_uri = canvasElement.toDataURL('image/jpeg', 0.9);
+
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-                document.getElementById('my_result').innerHTML = '<img src="' + data_uri +'"/>';
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-                window.location.href = '<?= base_url('pegawai/home') ?>';
-                }
-
-
-            };
-            xhttp.open("POST", "<?= base_url('pegawai/presensi_masuk_aksi') ?>", true);
-            xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-            xhttp.send(
-                'foto_masuk=' + encodeURIComponent(data_uri) + 
-                '&id_pegawai=' + id +
-                '&tanggal_masuk=' + tanggal_masuk +
-                '&jam_masuk=' + jam_masuk +
-                '&shift_id=' + encodeURIComponent(document.getElementById('shift_id').value)
-            );
-
-    })
-            
-    });
-
-
+        document.getElementById('my_result').innerHTML = '<img src="' + data_uri +'"/>';
+        if (xhttp.readyState == 4 && xhttp.status == 200) {
+            window.location.href = '<?= base_url('pegawai/home') ?>';
+        }
+    };
+    xhttp.open("POST", "<?= base_url('pegawai/presensi_masuk_aksi') ?>", true);
+    xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+    xhttp.send(
+        'foto_masuk=' + encodeURIComponent(data_uri) +
+        '&id_pegawai=' + encodeURIComponent(document.getElementById('id_pegawai').value) +
+        '&tanggal_masuk=' + encodeURIComponent(document.getElementById('tanggal_masuk').value) +
+        '&jam_masuk=' + encodeURIComponent(document.getElementById('jam_masuk').value) +
+        '&shift_id=' + encodeURIComponent(document.getElementById('shift_id').value)
+    );
+});
 </script>
     
 <?= $this->endSection() ?>
