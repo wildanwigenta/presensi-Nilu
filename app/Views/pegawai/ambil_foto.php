@@ -40,15 +40,18 @@ const leftEyeIndices = [33, 133, 159, 145, 153, 144, 163, 154];
 const rightEyeIndices = [362, 263, 386, 374, 380, 373, 390, 381];
 
 // Blink detection thresholds and state variables
-const OPEN_THRESHOLD = 0.22;     // EAR threshold for open eye
-const CLOSED_THRESHOLD = 0.15;   // EAR threshold for closed eye
-const BLINK_FRAME_THRESHOLD = 3; // Minimum frames required to confirm state change (debouncing)
+// const OPEN_THRESHOLD = 0.22;     // EAR threshold for open eye
+// const CLOSED_THRESHOLD = 0.15;   // EAR threshold for closed eye
+// const BLINK_FRAME_THRESHOLD = 3; // Minimum frames required to confirm state change (debouncing)
+
+const OPEN_THRESHOLD = 0.20;
+const CLOSED_THRESHOLD = 0.18;
+const BLINK_FRAME_THRESHOLD = 2;
 
 let leftEyeLandmarks = [];
 let rightEyeLandmarks = [];
 let blinkState = 'init';           // State machine: init | open_seen | closed_seen
 let verifiedBlink = false;         // Verification status
-let autoCaptureTriggered = false;  // Prevent multiple auto-capture attempts
 let openFrameCount = 0;            // Frame counter for debouncing open state
 let closedFrameCount = 0;          // Frame counter for debouncing closed state
 let cameraInitialized = false;     // Track camera initialization
@@ -111,7 +114,9 @@ function onResults(results) {
         const isOpen = averageEAR > OPEN_THRESHOLD;
         const isClosed = averageEAR < CLOSED_THRESHOLD;
 
-        // Debouncing: require multiple consecutive frames to confirm state change
+        // Debug - hapus setelah threshold sudah pas
+        console.log(`EAR: ${averageEAR.toFixed(3)} | State: ${blinkState}`);
+
         if (isOpen) {
             openFrameCount++;
             closedFrameCount = 0;
@@ -123,42 +128,37 @@ function onResults(results) {
             closedFrameCount = 0;
         }
 
-        // State machine: init → open_seen → closed_seen → verified
         if (!verifiedBlink) {
-            if (openFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'init') {
+            if (blinkState === 'init' && openFrameCount >= BLINK_FRAME_THRESHOLD) {
                 blinkState = 'open_seen';
             }
-            if (openFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'closed_seen') {
-                verifiedBlink = true;
-            }
-            if (closedFrameCount >= BLINK_FRAME_THRESHOLD && blinkState === 'open_seen') {
+            if (blinkState === 'open_seen' && closedFrameCount >= BLINK_FRAME_THRESHOLD) {
                 blinkState = 'closed_seen';
+            }
+            if (blinkState === 'closed_seen' && openFrameCount >= BLINK_FRAME_THRESHOLD) {
+                verifiedBlink = true;
             }
         }
 
-        // Update UI based on verification state
         if (verifiedBlink) {
-            statusElement.textContent = 'Verifikasi berhasil, mengambil foto...';
+            statusElement.textContent = 'Verifikasi berhasil, silakan klik Masuk';
             buttonElement.disabled = false;
-            
-            if (!autoCaptureTriggered) {
-                autoCaptureTriggered = true;
-                setTimeout(() => {
-                    performCapture('masuk');
-                }, 500);
-            }
+        } else if (blinkState === 'closed_seen') {
+            statusElement.textContent = 'Kedipan terdeteksi, buka mata kembali...';
         } else if (isClosed) {
-            statusElement.textContent = 'Mata tertutup';
+            statusElement.textContent = '✓ Mata tertutup terdeteksi';
             buttonElement.disabled = true;
         } else if (isOpen) {
-            statusElement.textContent = 'Mata terbuka';
+            statusElement.textContent = blinkState === 'init' 
+                ? 'Mata terbuka — silakan kedipkan mata' 
+                : 'Mata terbuka...';
             buttonElement.disabled = true;
         } else {
             statusElement.textContent = 'Wajah terdeteksi, silakan berkedip';
             buttonElement.disabled = true;
         }
+
     } else {
-        // Face not detected: reset all states
         statusElement.textContent = 'Wajah tidak terdeteksi';
         leftEyeLandmarks = [];
         rightEyeLandmarks = [];

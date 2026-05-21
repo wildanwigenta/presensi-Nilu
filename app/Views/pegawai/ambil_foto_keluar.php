@@ -42,7 +42,6 @@ let leftEyeLandmarks = [];
 let rightEyeLandmarks = [];
 let blinkState = 'init';           // State machine: init | open_seen | closed_seen
 let verifiedBlink = false;         // Verification status
-let autoCaptureTriggered = false;  // Prevent multiple auto-capture attempts
 let openFrameCount = 0;            // Frame counter for debouncing open state
 let closedFrameCount = 0;          // Frame counter for debouncing closed state
 let cameraInitialized = false;     // Track camera initialization
@@ -132,15 +131,8 @@ function onResults(results) {
 
         // Update UI based on verification state
         if (verifiedBlink) {
-            statusElement.textContent = 'Verifikasi berhasil, mengambil foto...';
+            statusElement.textContent = 'Verifikasi berhasil, silakan klik Keluar';
             buttonElement.disabled = false;
-            
-            if (!autoCaptureTriggered) {
-                autoCaptureTriggered = true;
-                setTimeout(() => {
-                    performCapture('keluar');
-                }, 500);
-            }
         } else if (isClosed) {
             statusElement.textContent = 'Mata tertutup';
             buttonElement.disabled = true;
