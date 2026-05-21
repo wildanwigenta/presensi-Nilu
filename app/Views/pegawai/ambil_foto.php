@@ -8,11 +8,11 @@
 <input type="hidden" id="shift_id" name="shift_id" value="<?= $shift_id ?>">
 <div class="mb-3">
   <video id="webcam" autoplay playsinline style="width:320px;height:240px;border:1px solid #ccc;"></video>
-  <div id="status" class="mt-2">Memuat kamera...</div>
+  <div id="status" class="mt-2">Silakan kedipkan mata untuk verifikasi</div>
 </div>
 <div style="display: none;" id="my_result"></div>
 <canvas id="capture_canvas" style="display:none;"></canvas>
-<button class="btn btn-primary mt-2" id="ambil-foto">Masuk</button>
+<button class="btn btn-primary mt-2" id="ambil-foto" disabled>Masuk</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -94,13 +94,17 @@ function onResults(results) {
         }
 
         if (verifiedBlink) {
-            statusElement.textContent = 'Verifikasi berhasil';
+            statusElement.textContent = 'Verifikasi berhasil, silakan klik Masuk';
+            document.getElementById('ambil-foto').disabled = false;
         } else if (isClosed) {
             statusElement.textContent = 'Mata tertutup';
+            document.getElementById('ambil-foto').disabled = true;
         } else if (isOpen) {
             statusElement.textContent = 'Mata terbuka';
+            document.getElementById('ambil-foto').disabled = true;
         } else {
             statusElement.textContent = 'Wajah terdeteksi, silakan berkedip';
+            document.getElementById('ambil-foto').disabled = true;
         }
     } else {
         statusElement.textContent = 'Wajah tidak terdeteksi';
@@ -108,6 +112,7 @@ function onResults(results) {
         rightEyeLandmarks = [];
         blinkState = 'init';
         verifiedBlink = false;
+        document.getElementById('ambil-foto').disabled = true;
     }
 }
 
