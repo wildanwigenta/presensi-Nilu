@@ -38,6 +38,11 @@ let rightEyeLandmarks = [];
 const leftEyeIndices = [33, 133, 159, 145, 153, 144, 163, 154];
 const rightEyeIndices = [362, 263, 386, 374, 380, 373, 390, 381];
 
+const OPEN_THRESHOLD = 0.22;
+const CLOSED_THRESHOLD = 0.15;
+let blinkState = 'init';
+let verifiedBlink = false;
+
 const camera = new Camera(videoElement, {
     onFrame: async () => {
         await faceMesh.send({image: videoElement});
@@ -47,16 +52,62 @@ const camera = new Camera(videoElement, {
 });
 camera.start();
 
+function distance(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function eyeAspectRatio(eye) {
+    if (eye.length !== 8) return 0;
+    const horizontal = distance(eye[0], eye[1]) || 1;
+    const vertical1 = distance(eye[2], eye[3]);
+    const vertical2 = distance(eye[6], eye[5]);
+    const vertical3 = distance(eye[7], eye[4]);
+    return (vertical1 + vertical2 + vertical3) / (3 * horizontal);
+}
+
+function getAverageEAR() {
+    const leftEAR = eyeAspectRatio(leftEyeLandmarks);
+    const rightEAR = eyeAspectRatio(rightEyeLandmarks);
+    return (leftEAR + rightEAR) / 2;
+}
+
 function onResults(results) {
     if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-        statusElement.textContent = 'Wajah terdeteksi';
         const landmarks = results.multiFaceLandmarks[0];
         leftEyeLandmarks = leftEyeIndices.map(index => landmarks[index]);
         rightEyeLandmarks = rightEyeIndices.map(index => landmarks[index]);
+
+        const averageEAR = getAverageEAR();
+        const isOpen = averageEAR > OPEN_THRESHOLD;
+        const isClosed = averageEAR < CLOSED_THRESHOLD;
+
+        if (!verifiedBlink) {
+            if (isOpen && blinkState === 'init') {
+                blinkState = 'open_seen';
+            }
+            if (isOpen && blinkState === 'closed_seen') {
+                verifiedBlink = true;
+            }
+            if (isClosed && blinkState === 'open_seen') {
+                blinkState = 'closed_seen';
+            }
+        }
+
+        if (verifiedBlink) {
+            statusElement.textContent = 'Verifikasi berhasil';
+        } else if (isClosed) {
+            statusElement.textContent = 'Mata tertutup';
+        } else if (isOpen) {
+            statusElement.textContent = 'Mata terbuka';
+        } else {
+            statusElement.textContent = 'Wajah terdeteksi, silakan berkedip';
+        }
     } else {
         statusElement.textContent = 'Wajah tidak terdeteksi';
         leftEyeLandmarks = [];
         rightEyeLandmarks = [];
+        blinkState = 'init';
+        verifiedBlink = false;
     }
 }
 
