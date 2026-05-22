@@ -106,6 +106,16 @@
                         </div>
 
                         <div class="input-style-1">
+                          <label>Registrasi Wajah</label>
+                          <div id="face_registration_container" class="border rounded p-3 mb-2" style="position: relative; max-width: 340px;">
+                            <div id="face_status" class="text-muted">Memuat kamera...</div>
+                            <div id="face_saved_status" class="text-success mt-2"><?= !empty($pegawai['face_descriptor']) ? 'Face descriptor sudah ada.' : '' ?></div>
+                          </div>
+                          <input type="hidden" id="face_descriptor" name="face_descriptor" value="" />
+                          <small class="text-secondary">Webcam akan aktif otomatis, dan sistem akan mendeteksi wajah secara realtime.</small>
+                        </div>
+
+                        <div class="input-style-1">
                                 <label>Username</label>
                                 <input type="text"
                                         class="form-control <?= ($validation->hasError('username'))? 'is-invalid' : '' ?>"
@@ -151,5 +161,7 @@
         </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="<?= base_url('assets/js/face-registration.js') ?>"></script>
 
 <?= $this->endSection() ?>

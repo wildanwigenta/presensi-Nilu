@@ -16,7 +16,8 @@ class PegawaiModel extends Model
         'no_hp',
         'jabatan',
         'lokasi_presensi',
-        'foto'
+        'foto',
+        'face_descriptor'
     ];
 
     public function detailPegawai($id)

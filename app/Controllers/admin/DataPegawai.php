@@ -185,6 +185,7 @@ class DataPegawai extends BaseController
                 'jabatan' => $this->request->getPost('jabatan'),
                 'lokasi_presensi' => $this->request->getPost('lokasi_presensi'),
                 'foto' => $nama_foto,
+                'face_descriptor' => $this->request->getPost('face_descriptor') ?: null,
             ]);
 
             $id_pegawai = $pegawaiModel->insertID();
@@ -370,7 +371,7 @@ class DataPegawai extends BaseController
                 $foto->move('profile', $nama_foto);
             }
             
-            $pegawaiModel->update($id, [
+            $updateData = [
                 'nama' => $this->request->getPost('nama'),
                 'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
                 'alamat' => $this->request->getPost('alamat'),
@@ -378,7 +379,14 @@ class DataPegawai extends BaseController
                 'jabatan' => $this->request->getPost('jabatan'),
                 'lokasi_presensi' => $this->request->getPost('lokasi_presensi'),
                 'foto' => $nama_foto,
-            ]);
+            ];
+
+            $faceDescriptor = $this->request->getPost('face_descriptor');
+            if (!empty($faceDescriptor)) {
+                $updateData['face_descriptor'] = $faceDescriptor;
+            }
+
+            $pegawaiModel->update($id, $updateData);
 
             if($this->request->getPost('password') == ''){
                 $password = $this->request->getPost('password_lama');

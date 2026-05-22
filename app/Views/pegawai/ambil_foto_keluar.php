@@ -6,6 +6,10 @@
 integrity="sha512-dQIiHSl2hr3NWKKLycPndtpbh5iaHLo6MwrXm7F0FM5e+kL2U16oE9uIwPHUl6fQBeCthiEuV/rzP3MiAB8Vfw==" 
 crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+<!-- face-api.js and loader for face recognition (models loaded from /assets/models) -->
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="<?= base_url('assets/js/face-recognition.js') ?>"></script>
+
 <input type="hidden" id="tanggal_keluar" name="tanggal_keluar" value="<?= $tanggal_keluar ?>">
 <input type="hidden" id="jam_keluar" name="jam_keluar" value="<?= $jam_keluar ?>">
 <div id="my_camera"></div>
