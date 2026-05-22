@@ -278,4 +278,74 @@ class Home extends BaseController
 
     }
 
+    public function verify_face()
+    {
+        $request = \Config\Services::request();
+        if (!$id_pegawai) {
+            return $this->response->setJSON([
+                'verified' => false,
+                'distance' => null,
+                'message' => 'Sesi pegawai tidak valid.'
+            ]);
+        }
+
+        $input = $request->getJSON(true);
+        $descriptor = $input['descriptor'] ?? null;
+
+        if (!is_array($descriptor) || empty($descriptor)) {
+            return $this->response->setJSON([
+                'verified' => false,
+                'distance' => null,
+                'message' => 'Descriptor wajah tidak valid.'
+            ]);
+        }
+
+        $pegawaiModel = new PegawaiModel();
+        $pegawai = $pegawaiModel->find($id_pegawai);
+        $storedDescriptorJson = $pegawai['face_descriptor'] ?? null;
+
+        if (empty($storedDescriptorJson)) {
+            return $this->response->setJSON([
+                'verified' => false,
+                'distance' => null,
+                'message' => 'Data descriptor wajah belum disimpan.'
+            ]);
+        }
+
+        $storedDescriptor = json_decode($storedDescriptorJson, true);
+        if (!is_array($storedDescriptor) || count($storedDescriptor) !== count($descriptor)) {
+            return $this->response->setJSON([
+                'verified' => false,
+                'distance' => null,
+                'message' => 'Descriptor wajah tidak cocok dengan format.'
+            ]);
+        }
+
+        $distance = $this->calculateEuclideanDistance($storedDescriptor, $descriptor);
+        $threshold = 0.55;
+        $verified = $distance !== null && $distance <= $threshold;
+
+        return $this->response->setJSON([
+            'verified' => $verified,
+            'distance' => $distance,
+            'threshold' => $threshold,
+            'message' => $verified ? 'Wajah sesuai akun' : 'Wajah tidak sesuai akun'
+        ]);
+    }
+
+    private function calculateEuclideanDistance(array $a, array $b)
+    {
+        if (count($a) !== count($b)) {
+            return null;
+        }
+
+        $sum = 0.0;
+        foreach ($a as $index => $value) {
+            $diff = (float) $value - (float) $b[$index];
+            $sum += $diff * $diff;
+        }
+
+        return sqrt($sum);
+    }
+
 }

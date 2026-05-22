@@ -52,6 +52,7 @@ $routes->get('admin/approved_ketidakhadiran/(:segment)', 'admin\Ketidakhadiran::
 $routes->get('pegawai/home', 'pegawai\home::index', ['filter' => 'pegawaiFilter']);
 $routes->post('pegawai/presensi_masuk', 'pegawai\home::presensi_masuk', ['filter' => 'pegawaiFilter']);
 $routes->post('pegawai/presensi_masuk_aksi', 'pegawai\home::presensi_masuk_aksi', ['filter' => 'pegawaiFilter']);
+$routes->post('pegawai/verify_face', 'pegawai\home::verify_face', ['filter' => 'pegawaiFilter']);
 
 $routes->post('pegawai/presensi_keluar/(:segment)', 'pegawai\home::presensi_keluar/$1', ['filter' => 'pegawaiFilter']);
 $routes->post('pegawai/presensi_keluar_aksi/(:segment)', 'pegawai\home::presensi_keluar_aksi/$1', ['filter' => 'pegawaiFilter']);

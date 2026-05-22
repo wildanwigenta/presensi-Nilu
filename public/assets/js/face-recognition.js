@@ -1,99 +1,205 @@
-// Face recognition loader: loads face-api models and initializes webcam for realtime detection.
+// Face recognition loader: loads face-api models, verifies login face descriptor, and enables presensi button.
 (function(){
   async function initFaceAPI(){
-    if(typeof faceapi === 'undefined'){
-      console.warn('face-api.js not loaded');
+    const cameraContainer = document.getElementById('my_camera');
+    const statusEl = document.getElementById('face_status');
+    const matchEl = document.getElementById('face_match_status');
+    const button = document.getElementById('ambil-foto') || document.getElementById('ambil-foto-keluar');
+
+    if(!cameraContainer || !statusEl || !button){
       return;
     }
 
-    const modelUrl = '/assets/models';
+    button.disabled = true;
+    statusEl.textContent = 'Memuat face-api.js...';
+    matchEl.textContent = '';
+
+    if(typeof faceapi === 'undefined'){
+      statusEl.textContent = 'face-api.js tidak ditemukan.';
+      return;
+    }
+
+    const verifyUrl = window.faceVerificationConfig?.verifyUrl || '/pegawai/verify_face';
+    const modelUrl = window.faceVerificationConfig?.modelUrl || new URL('/assets/models', window.location.origin).href;
 
     try{
-      // Load models required for realtime detection and descriptor generation
       await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
       await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
       await faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl);
     }catch(err){
-      console.error('Error loading face-api models:', err);
+      statusEl.textContent = 'Gagal memuat model face-api.';
+      console.error('Load face-api models error:', err);
       return;
     }
 
-    // create or reuse a hidden video element inside #my_camera
-    const cameraContainer = document.getElementById('my_camera');
-    if(!cameraContainer) return;
-
-    let video = document.getElementById('face_video');
-    if(!video){
-      video = document.createElement('video');
-      video.id = 'face_video';
-      video.width = 320;
-      video.height = 240;
-      video.style.display = 'block';
-      video.style.maxWidth = '320px';
-      video.style.maxHeight = '240px';
-      video.autoplay = true;
-      video.muted = true;
-      video.playsInline = true;
-      cameraContainer.appendChild(video);
+    if(cameraContainer.querySelector('video') || cameraContainer.querySelector('canvas')){
+      statusEl.textContent = 'Kamera sudah aktif.';
     }
 
-    // status indicator
-    let statusEl = document.getElementById('face_status');
-    if(!statusEl){
-      statusEl = document.createElement('div');
-      statusEl.id = 'face_status';
-      statusEl.style.marginTop = '6px';
-      statusEl.style.fontSize = '13px';
-      cameraContainer.appendChild(statusEl);
+    const video = document.createElement('video');
+    video.id = 'face_video';
+    video.style.width = '100%';
+    video.style.height = '100%';
+    video.style.borderRadius = '8px';
+    video.style.border = '1px solid #ddd';
+    video.style.display = 'block';
+    video.autoplay = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    const existingVideo = cameraContainer.querySelector('video');
+    const existingCanvas = cameraContainer.querySelector('canvas');
+    if(existingVideo){
+      existingVideo.remove();
+    }
+    if(existingCanvas){
+      existingCanvas.remove();
     }
 
+    cameraContainer.appendChild(video);
+
+    const canvas = faceapi.createCanvasFromMedia(video);
+    canvas.id = 'face_canvas';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    cameraContainer.appendChild(canvas);
+
+    let stream;
     try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if(window.faceRecognitionStream){
+        window.faceRecognitionStream.getTracks().forEach(track => track.stop());
+      }
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      window.faceRecognitionStream = stream;
       video.srcObject = stream;
+      await video.play();
     }catch(err){
-      statusEl.textContent = 'Camera akses ditolak atau tidak tersedia.';
-      console.warn('getUserMedia error', err);
+      statusEl.textContent = 'Akses kamera ditolak atau tidak tersedia.';
+      console.error('Camera access error:', err);
       return;
     }
 
-    video.addEventListener('play', ()=>{
-      const canvas = faceapi.createCanvasFromMedia(video);
-      canvas.id = 'face_canvas';
-      cameraContainer.appendChild(canvas);
-      const displaySize = { width: video.width, height: video.height };
-      faceapi.matchDimensions(canvas, displaySize);
+    const displaySize = { width: cameraContainer.clientWidth || 320, height: cameraContainer.clientHeight || 240 };
+    faceapi.matchDimensions(canvas, displaySize);
 
-      // run detection loop
-      const interval = setInterval(async ()=>{
-        if(video.paused || video.ended){
-          return;
+    let verifying = false;
+    let verified = false;
+    let lastSentDescriptor = null;
+    let lastServerDescriptor = null;
+    let lastServerDistance = null;
+    let lastVerifyTime = 0;
+
+    const resetStatus = () => {
+      verified = false;
+      button.disabled = true;
+      matchEl.textContent = '';
+    };
+
+    const setStatus = (message, matchMessage, valid) => {
+      statusEl.textContent = message;
+      matchEl.textContent = matchMessage || '';
+      button.disabled = !valid;
+    };
+
+    const compareWithServer = async (descriptor) => {
+      if(verifying) return null;
+      verifying = true;
+      try{
+        const response = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ descriptor: Array.from(descriptor) })
+        });
+
+        if(!response.ok){
+          throw new Error(`Server returned ${response.status}`);
         }
-        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
-        const resized = faceapi.resizeResults(detections, displaySize);
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        faceapi.draw.drawDetections(canvas, resized);
-        faceapi.draw.drawFaceLandmarks(canvas, resized);
 
-        if(detections && detections.length > 0){
-          statusEl.textContent = 'Wajah terdeteksi (' + detections.length + ')';
+        const data = await response.json();
+        if(data.verified){
+          verified = true;
+          lastServerDescriptor = descriptor;
+          lastServerDistance = data.distance;
+          setStatus('Wajah sesuai akun', `Distance: ${data.distance.toFixed(4)}`, true);
         } else {
-          statusEl.textContent = 'Wajah tidak terdeteksi';
+          verified = false;
+          lastServerDistance = data.distance;
+          setStatus('Wajah tidak sesuai akun', data.distance !== null ? `Distance: ${data.distance.toFixed(4)}` : '', false);
         }
-      }, 250);
 
-      // stop detection when page unloads
-      window.addEventListener('beforeunload', ()=>{
-        clearInterval(interval);
-        if(video && video.srcObject){
-          const tracks = video.srcObject.getTracks();
-          tracks.forEach(t=>t.stop());
+        return data;
+      }catch(err){
+        console.error('Verify face error', err);
+        verified = false;
+        setStatus('Gagal memverifikasi wajah', '', false);
+        return null;
+      } finally {
+        verifying = false;
+      }
+    };
+
+    const detectorOptions = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+    const recheckDelay = 1200;
+
+    const processFrame = async () => {
+      if(video.paused || video.ended){
+        return;
+      }
+
+      const result = await faceapi.detectSingleFace(video, detectorOptions).withFaceLandmarks().withFaceDescriptor();
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if(!result){
+        setStatus('Wajah tidak terdeteksi', '', false);
+        if(verified){
+          resetStatus();
         }
-      });
+        return;
+      }
+
+      const resizedResult = faceapi.resizeResults(result, displaySize);
+      faceapi.draw.drawDetections(canvas, resizedResult);
+      faceapi.draw.drawFaceLandmarks(canvas, resizedResult);
+
+      const descriptor = result.descriptor;
+      statusEl.textContent = verified ? 'Wajah sesuai akun' : 'Wajah terdeteksi, memverifikasi...';
+
+      const now = Date.now();
+      const shouldVerify = !verified && !verifying && (
+        !lastSentDescriptor || faceapi.euclideanDistance(lastSentDescriptor, descriptor) > 0.02 || (now - lastVerifyTime) > recheckDelay
+      );
+
+      if(verified && lastServerDescriptor){
+        const stillMatch = faceapi.euclideanDistance(lastServerDescriptor, descriptor) <= 0.05;
+        if(!stillMatch){
+          verified = false;
+          setStatus('Wajah terdeteksi, memverifikasi ulang...', '', false);
+        }
+      }
+
+      if(!verified && shouldVerify){
+        lastSentDescriptor = descriptor;
+        lastVerifyTime = now;
+        await compareWithServer(descriptor);
+      }
+    };
+
+    const interval = setInterval(processFrame, 400);
+
+    window.addEventListener('beforeunload', ()=>{
+      clearInterval(interval);
+      if(window.faceRecognitionStream){
+        window.faceRecognitionStream.getTracks().forEach(track => track.stop());
+        window.faceRecognitionStream = null;
+      }
     });
   }
 
-  // initialize when DOM ready
   if(document.readyState === 'complete' || document.readyState === 'interactive'){
     setTimeout(initFaceAPI, 200);
   } else {
