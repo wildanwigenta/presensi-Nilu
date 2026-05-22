@@ -2,56 +2,58 @@
 
 <?= $this->section('content') ?>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js" 
-integrity="sha512-dQIiHSl2hr3NWKKLycPndtpbh5iaHLo6MwrXm7F0FM5e+kL2U16oE9uIwPHUl6fQBeCthiEuV/rzP3MiAB8Vfw==" 
-crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+  window.faceVerificationConfig = {
+    verifyUrl: '<?= base_url('pegawai/verify_face') ?>',
+    modelUrl: '<?= base_url('assets/models') ?>'
+  };
+</script>
+
+<!-- face-api.js and loader for face recognition (models loaded from /assets/models) -->
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="<?= base_url('assets/js/face-recognition.js') ?>"></script>
 
 <input type="hidden" id="tanggal_keluar" name="tanggal_keluar" value="<?= $tanggal_keluar ?>">
 <input type="hidden" id="jam_keluar" name="jam_keluar" value="<?= $jam_keluar ?>">
-<div id="my_camera"></div>
+<div id="my_camera" style="position: relative; width: 320px; height: 240px;"></div>
+<div id="face_status" class="text-muted mt-2">Menunggu verifikasi wajah...</div>
+<div id="face_match_status" class="fw-semibold mt-1"></div>
 <div style="display: none;" id="my_result"></div>
-<button class="btn btn-danger mt-2" id="ambil-foto-keluar">Keluar</button>
+<button class="btn btn-danger mt-2" id="ambil-foto-keluar" disabled>Keluar</button>
 
 <script>
-    Webcam.set({
-        width: 320,
-        height: 240,
-        dest_width: 320,
-        dest_height: 240,
-        image_format: 'jpeg',
-        jpeg_quality: 90,
-        force_flash: false
-    });
-
-    Webcam.attach('#my_camera');
-
     document.getElementById('ambil-foto-keluar').addEventListener('click', function(){
-        let tanggal_keluar = document.getElementById('tanggal_keluar').value;
-        let jam_keluar = document.getElementById('jam_keluar').value;
+        if(this.disabled){
+            return;
+        }
 
-    Webcam.snap(function(data_uri){
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-                document.getElementById('my_result').innerHTML = '<img src="' + data_uri +'"/>';
+        const video = document.getElementById('face_video');
+        if(!video){
+            return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const data_uri = canvas.toDataURL('image/jpeg', 0.9);
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            document.getElementById('my_result').innerHTML = '<img src="' + data_uri +'"/>';
             if (xhttp.readyState == 4 && xhttp.status == 200) {
                 window.location.href = '<?= base_url('pegawai/home') ?>';
-                }
-
-
-            };
-            xhttp.open("POST", "<?= base_url('pegawai/presensi_keluar_aksi/' . $id_presensi) ?>", true);
-            xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-            xhttp.send(
-                'foto_keluar=' + encodeURIComponent(data_uri) +
-                '&tanggal_keluar=' + tanggal_keluar +
-                '&jam_keluar=' + jam_keluar
-            );
-
-    })
-            
+            }
+        };
+        xhttp.open("POST", "<?= base_url('pegawai/presensi_keluar_aksi/' . $id_presensi) ?>", true);
+        xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+        xhttp.send(
+            'foto_keluar=' + encodeURIComponent(data_uri) +
+            '&tanggal_keluar=' + encodeURIComponent(document.getElementById('tanggal_keluar').value) +
+            '&jam_keluar=' + encodeURIComponent(document.getElementById('jam_keluar').value)
+        );
     });
-
-
 </script>
     
 <?= $this->endSection() ?>
