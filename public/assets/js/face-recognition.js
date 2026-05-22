@@ -20,16 +20,29 @@
     }
 
     const verifyUrl = window.faceVerificationConfig?.verifyUrl || '/pegawai/verify_face';
-    const modelUrl = window.faceVerificationConfig?.modelUrl || new URL('/assets/models', window.location.origin).href;
+    const localModelUrl = window.faceVerificationConfig?.modelUrl || new URL('/assets/models', window.location.origin).href;
+    const fallbackModelUrl = 'https://justadudewhohacks.github.io/face-api.js/models';
 
+    const loadModelSet = async (baseUrl) => {
+      await faceapi.nets.tinyFaceDetector.loadFromUri(baseUrl);
+      await faceapi.nets.faceLandmark68Net.loadFromUri(baseUrl);
+      await faceapi.nets.faceRecognitionNet.loadFromUri(baseUrl);
+    };
+
+    let modelUrl = localModelUrl;
     try{
-      await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(modelUrl);
+      await loadModelSet(modelUrl);
     }catch(err){
-      statusEl.textContent = 'Gagal memuat model face-api.';
-      console.error('Load face-api models error:', err);
-      return;
+      console.warn('Local model load failed, trying fallback:', err);
+      statusEl.textContent = 'Memuat model face-api dari server remote...';
+      modelUrl = fallbackModelUrl;
+      try{
+        await loadModelSet(modelUrl);
+      }catch(remoteErr){
+        statusEl.textContent = 'Gagal memuat model face-api.';
+        console.error('Load face-api models error:', remoteErr);
+        return;
+      }
     }
 
     if(cameraContainer.querySelector('video') || cameraContainer.querySelector('canvas')){
