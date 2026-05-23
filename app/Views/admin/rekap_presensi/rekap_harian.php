@@ -16,7 +16,7 @@
 
 <span>Menampilkan Data :
     <?php if ($tanggal) : ?>
-    <?= date('d F Y', strtotime($tanggal)) ?>
+        <?= date('d F Y', strtotime($tanggal)) ?>
     <?php else : ?>
         <?= date('d F Y') ?>
     <?php endif; ?>
@@ -37,36 +37,31 @@
             </tr>
         </thead>
         <tbody>
-            <?php if(!empty($rekap_harian)) : ?>
-                <?php $no=1; foreach($rekap_harian as $rekap) : ?>
-                    <?php 
-                    // Menghitung jumlah jam kerja
-                    $total_jam_kerja = '0 Jam 0 Menit';
-                    if($rekap['jam_masuk'] != '00:00:00' && $rekap['jam_keluar'] != '00:00:00') {
-                        $timestamp_jam_masuk = strtotime($rekap['tanggal_masuk'] . ' ' . $rekap['jam_masuk']);
-                        $timestamp_jam_keluar = strtotime($rekap['tanggal_keluar'] . ' ' . $rekap['jam_keluar']);
-                        $selisih = $timestamp_jam_keluar - $timestamp_jam_masuk;
-                        if($selisih > 0) {
-                            $jam = floor($selisih / 3600);
-                            $selisih -= $jam * 3600;
-                            $menit = floor($selisih / 60);
-                            $total_jam_kerja = $jam . ' Jam ' . $menit . ' Menit';
+            <?php if (!empty($rekap_harian)) : ?>
+                <?php $no = 1; foreach ($rekap_harian as $rekap) : ?>
+                    <?php
+                    // Hitung total jam kerja
+                    $total_jam_kerja = '-';
+                    if (!empty($rekap['jam_masuk']) && !empty($rekap['jam_keluar'])) {
+                        $masuk  = new DateTime($rekap['tanggal_masuk'] . ' ' . $rekap['jam_masuk']);
+                        $keluar = new DateTime(($rekap['tanggal_keluar'] ?: $rekap['tanggal_masuk']) . ' ' . $rekap['jam_keluar']);
+                        if ($keluar < $masuk) {
+                            $keluar->modify('+1 day');
                         }
+                        $diff            = $masuk->diff($keluar);
+                        $total_jam_kerja = (($diff->days * 24) + $diff->h) . ' Jam ' . $diff->i . ' Menit';
                     }
-                    
-                    // Menghitung total keterlambatan
-                    $total_terlambat = '0 Jam 0 Menit';
-                    if(isset($rekap['jam_masuk_kantor']) && $rekap['jam_masuk'] != '00:00:00') {
-                        $jam_masuk_real = strtotime($rekap['jam_masuk']);
-                        $jam_masuk_kantor = strtotime($rekap['jam_masuk_kantor']);
-                        $selisih_terlambat = $jam_masuk_real - $jam_masuk_kantor;
-                        if($selisih_terlambat > 0) {
-                            $jam_terlambat = floor($selisih_terlambat / 3600);
-                            $selisih_terlambat -= $jam_terlambat * 3600;
-                            $menit_terlambat = floor($selisih_terlambat / 60);
-                            $total_terlambat = $jam_terlambat . ' Jam ' . $menit_terlambat . ' Menit';
-                        } else {
+
+                    // Hitung keterlambatan
+                    $total_terlambat = '-';
+                    if (!empty($rekap['jam_masuk']) && !empty($rekap['jam_masuk_kantor'])) {
+                        $masuk  = new DateTime($rekap['tanggal_masuk'] . ' ' . $rekap['jam_masuk']);
+                        $kantor = new DateTime($rekap['tanggal_masuk'] . ' ' . $rekap['jam_masuk_kantor']);
+                        if ($masuk <= $kantor) {
                             $total_terlambat = '<span class="badge bg-success">On Time</span>';
+                        } else {
+                            $diff            = $kantor->diff($masuk);
+                            $total_terlambat = $diff->h . ' Jam ' . $diff->i . ' Menit';
                         }
                     }
                     ?>
@@ -76,7 +71,7 @@
                         <td><?= esc($rekap['nama_shift'] ?? '-') ?></td>
                         <td><?= date('d F Y', strtotime($rekap['tanggal_masuk'])) ?></td>
                         <td><?= esc($rekap['jam_masuk']) ?></td>
-                        <td><?= esc($rekap['jam_keluar']) ?></td>
+                        <td><?= !empty($rekap['jam_keluar']) ? esc($rekap['jam_keluar']) : '-' ?></td>
                         <td><?= $total_jam_kerja ?></td>
                         <td><?= $total_terlambat ?></td>
                     </tr>
