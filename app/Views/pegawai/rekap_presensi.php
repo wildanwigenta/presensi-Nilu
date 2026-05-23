@@ -33,7 +33,10 @@
                     <?php
                     // Hitung total jam kerja
                     $total_jam_kerja = '-';
-                    if (!empty($rekap['jam_masuk']) && !empty($rekap['jam_keluar'])) {
+                    if (!empty($rekap['jam_masuk']) && !empty($rekap['jam_keluar']) 
+                    && $rekap['jam_keluar'] !== '00:00:00' 
+                    && $rekap['tanggal_keluar'] !== '0000-00-00'
+                    && $rekap['tanggal_keluar'] !== null) {
                         $masuk  = new DateTime($rekap['tanggal_masuk'] . ' ' . $rekap['jam_masuk']);
                         $keluar = new DateTime(($rekap['tanggal_keluar'] ?: $rekap['tanggal_masuk']) . ' ' . $rekap['jam_keluar']);
                         

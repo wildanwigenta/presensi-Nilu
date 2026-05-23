@@ -64,21 +64,24 @@
 
             <div class="input-style-1">
             <label>Shift</label>
-            <div class="row">
+            <div class="shift-grid mt-2">
                 <?php if(!empty($shifts)): ?>
-                    <?php foreach($shifts as $shift): ?>
-                        <div class="col-md-6 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="shift_ids[]" value="<?= $shift['id'] ?>" id="shift_<?= $shift['id'] ?>"
-                                    <?= in_array($shift['id'], old('shift_ids', [])) ? 'checked' : '' ?> >
-                                <label class="form-check-label" for="shift_<?= $shift['id'] ?>">
-                                    <?= $shift['nama_lokasi'] ?> - <?= $shift['nama_shift'] ?> (<?= $shift['jam_masuk'] ?> - <?= $shift['jam_keluar'] ?>)
-                                </label>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                <?php foreach($shifts as $shift): ?>
+                <label class="shift-card">
+                    <input class="shift-checkbox" type="checkbox" name="shift_ids[]" value="<?= $shift['id'] ?>" id="shift_<?= $shift['id'] ?>"
+                        <?= in_array($shift['id'], old('shift_ids', [])) ? 'checked' : '' ?>>
+                    <div class="shift-info">
+                        <span class="shift-name"><?= $shift['nama_shift'] ?></span>
+                        <span class="shift-meta"><?= $shift['nama_lokasi'] ?></span>
+                        <span class="shift-badge">
+                            <i class="ti ti-clock"></i>
+                            <?= $shift['jam_masuk'] ?> – <?= $shift['jam_keluar'] ?>
+                        </span>
+                    </div>
+                </label>
+                <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="col-12 text-muted">Belum ada data shift.</div>
+                <p class="text-muted small">Belum ada data shift.</p>
                 <?php endif; ?>
             </div>
             </div>
