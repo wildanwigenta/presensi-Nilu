@@ -24,33 +24,61 @@
     const fallbackModelUrl = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const loadModelSet = async (baseUrl) => {
-      await faceapi.nets.tinyFaceDetector.loadFromUri(baseUrl);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(baseUrl);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(baseUrl);
+      console.log('Loading face-api models from:', baseUrl);
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(baseUrl);
+        console.log('✓ TinyFaceDetector loaded');
+        await faceapi.nets.faceLandmark68Net.loadFromUri(baseUrl);
+        console.log('✓ FaceLandmark68Net loaded');
+        await faceapi.nets.faceRecognitionNet.loadFromUri(baseUrl);
+        console.log('✓ FaceRecognitionNet loaded');
+      } catch(err) {
+        console.error('Model load failed:', err.message);
+        throw err;
+      }
     };
 
     let modelUrl = localModelUrl;
+    let modelsLoaded = false;
+    
     try{
+      statusEl.textContent = 'Memuat model wajah dari lokal...';
       await loadModelSet(modelUrl);
-      statusEl.textContent = 'Model face-api dimuat.';
+      statusEl.textContent = 'Model wajah berhasil dimuat.';
+      modelsLoaded = true;
+      console.log('Models loaded successfully from local');
     }catch(err){
       console.warn('Local model load failed, trying fallback:', err);
-      statusEl.textContent = 'Memuat model face-api dari server remote...';
+      statusEl.textContent = 'Memuat model wajah dari server remote...';
+      matchEl.textContent = 'Koneksi internet diperlukan untuk verifikasi wajah';
       modelUrl = fallbackModelUrl;
       try{
         await loadModelSet(modelUrl);
-        statusEl.textContent = 'Model face-api dimuat dari server remote.';
+        statusEl.textContent = 'Model wajah berhasil dimuat dari server.';
+        modelsLoaded = true;
+        console.log('Models loaded successfully from remote');
       }catch(remoteErr){
-        statusEl.textContent = 'Gagal memuat model face-api.';
+        statusEl.textContent = 'Gagal memuat model wajah. Periksa koneksi internet.';
+        matchEl.textContent = 'Error: ' + remoteErr.message;
         console.error('Load face-api models error:', remoteErr);
+        button.disabled = true;
         return;
       }
     }
 
-    if(cameraContainer.querySelector('video') || cameraContainer.querySelector('canvas')){
-      statusEl.textContent = 'Kamera sudah aktif.';
+    if(!modelsLoaded) {
+      statusEl.textContent = 'Gagal memuat model wajah.';
+      button.disabled = true;
+      return;
     }
 
+    // Bersihkan elemen lama jika ada
+    const existingVideo = cameraContainer.querySelector('video');
+    const existingCanvas = cameraContainer.querySelector('canvas');
+    if(existingVideo) existingVideo.remove();
+    if(existingCanvas) existingCanvas.remove();
+
+    // Buat elemen video
     const video = document.createElement('video');
     video.id = 'face_video';
     video.style.width = '100%';
@@ -61,19 +89,53 @@
     video.autoplay = true;
     video.muted = true;
     video.playsInline = true;
-
-    const existingVideo = cameraContainer.querySelector('video');
-    const existingCanvas = cameraContainer.querySelector('canvas');
-    if(existingVideo){
-      existingVideo.remove();
-    }
-    if(existingCanvas){
-      existingCanvas.remove();
-    }
-
     cameraContainer.appendChild(video);
 
-    const canvas = faceapi.createCanvasFromMedia(video);
+    // Aktifkan kamera
+    let stream;
+    try{
+      if(window.faceRecognitionStream){
+        window.faceRecognitionStream.getTracks().forEach(track => track.stop());
+      }
+      statusEl.textContent = 'Mengaktifkan kamera...';
+      stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'user',
+          width: { ideal: 320 },
+          height: { ideal: 240 }
+        } 
+      });
+      window.faceRecognitionStream = stream;
+      video.srcObject = stream;
+
+      // Tunggu video benar-benar siap sebelum lanjut
+      await new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          video.play().then(resolve).catch(() => resolve());
+        };
+      });
+
+      // Tunggu frame pertama siap
+      await new Promise((resolve) => {
+        if(video.readyState >= 2){
+          resolve();
+        } else {
+          video.addEventListener('loadeddata', resolve, { once: true });
+        }
+      });
+
+      statusEl.textContent = 'Kamera siap. Arahkan wajah ke kamera...';
+      console.log('Camera started successfully');
+    }catch(err){
+      statusEl.textContent = 'Akses kamera ditolak atau tidak tersedia: ' + err.name;
+      matchEl.textContent = 'Izinkan akses kamera untuk melanjutkan verifikasi wajah';
+      console.error('Camera access error:', err);
+      button.disabled = true;
+      return;
+    }
+
+    // Buat canvas SETELAH kamera siap
+    const canvas = document.createElement('canvas');
     canvas.id = 'face_canvas';
     canvas.style.position = 'absolute';
     canvas.style.top = '0';
@@ -82,22 +144,6 @@
     canvas.style.height = '100%';
     canvas.style.pointerEvents = 'none';
     cameraContainer.appendChild(canvas);
-
-    let stream;
-    try{
-      if(window.faceRecognitionStream){
-        window.faceRecognitionStream.getTracks().forEach(track => track.stop());
-      }
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      window.faceRecognitionStream = stream;
-      video.srcObject = stream;
-      statusEl.textContent = 'Mengaktifkan kamera...';
-      await video.play();
-    }catch(err){
-      statusEl.textContent = 'Akses kamera ditolak atau tidak tersedia.';
-      console.error('Camera access error:', err);
-      return;
-    }
 
     const setDisplaySize = () => {
       const displaySize = {
@@ -110,9 +156,9 @@
       return displaySize;
     };
 
-    const displaySize = setDisplaySize();
+    let displaySize = setDisplaySize();
     video.addEventListener('loadedmetadata', () => {
-      setDisplaySize();
+      displaySize = setDisplaySize();
     });
 
     let verifying = false;
@@ -138,6 +184,7 @@
       if(verifying) return null;
       verifying = true;
       try{
+        console.log('Sending face descriptor to server for verification...');
         const response = await fetch(verifyUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -149,22 +196,28 @@
         }
 
         const data = await response.json();
+        console.log('Verification response:', data);
+        
         if(data.verified){
           verified = true;
           lastServerDescriptor = descriptor;
           lastServerDistance = data.distance;
-          setStatus('Wajah sesuai akun', `Distance: ${data.distance.toFixed(4)}`, true);
+          setStatus('✓ Wajah sesuai akun', `Kemiripan: ${(100 - data.distance*100).toFixed(1)}%`, true);
         } else {
           verified = false;
           lastServerDistance = data.distance;
-          setStatus('Wajah tidak sesuai akun', data.distance !== null ? `Distance: ${data.distance.toFixed(4)}` : '', false);
+          if(data.distance !== null) {
+            setStatus('✗ Wajah tidak sesuai akun', `Kemiripan: ${(100 - data.distance*100).toFixed(1)}% (perlu ≥ ${(100 - 55).toFixed(1)}%)`, false);
+          } else {
+            setStatus('✗ Wajah tidak sesuai akun', data.message || '', false);
+          }
         }
 
         return data;
       }catch(err){
         console.error('Verify face error', err);
         verified = false;
-        setStatus('Gagal memverifikasi wajah', '', false);
+        setStatus('✗ Gagal memverifikasi wajah', 'Periksa koneksi internet', false);
         return null;
       } finally {
         verifying = false;
@@ -179,42 +232,50 @@
         return;
       }
 
-      const result = await faceapi.detectSingleFace(video, detectorOptions).withFaceLandmarks().withFaceDescriptor();
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      try {
+        const result = await faceapi.detectSingleFace(video, detectorOptions).withFaceLandmarks().withFaceDescriptor();
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if(!result){
-        setStatus('Wajah tidak terdeteksi', '', false);
-        if(verified){
-          resetStatus();
+        if(!result){
+          setStatus('Wajah tidak terdeteksi. Arahkan wajah ke kamera.', '', false);
+          if(verified){
+            resetStatus();
+          }
+          return;
         }
-        return;
-      }
 
-      const resizedResult = faceapi.resizeResults(result, displaySize);
-      faceapi.draw.drawDetections(canvas, resizedResult);
-      faceapi.draw.drawFaceLandmarks(canvas, resizedResult);
+        const resizedResult = faceapi.resizeResults(result, displaySize);
+        faceapi.draw.drawDetections(canvas, resizedResult);
+        faceapi.draw.drawFaceLandmarks(canvas, resizedResult);
 
-      const descriptor = result.descriptor;
-      statusEl.textContent = verified ? 'Wajah sesuai akun' : 'Wajah terdeteksi, memverifikasi...';
-
-      const now = Date.now();
-      const shouldVerify = !verified && !verifying && (
-        !lastSentDescriptor || faceapi.euclideanDistance(lastSentDescriptor, descriptor) > 0.02 || (now - lastVerifyTime) > recheckDelay
-      );
-
-      if(verified && lastServerDescriptor){
-        const stillMatch = faceapi.euclideanDistance(lastServerDescriptor, descriptor) <= 0.05;
-        if(!stillMatch){
-          verified = false;
-          setStatus('Wajah terdeteksi, memverifikasi ulang...', '', false);
+        const descriptor = result.descriptor;
+        
+        if(!verified) {
+          statusEl.textContent = 'Wajah terdeteksi, memverifikasi...';
         }
-      }
 
-      if(!verified && shouldVerify){
-        lastSentDescriptor = descriptor;
-        lastVerifyTime = now;
-        await compareWithServer(descriptor);
+        const now = Date.now();
+        const shouldVerify = !verified && !verifying && (
+          !lastSentDescriptor || faceapi.euclideanDistance(lastSentDescriptor, descriptor) > 0.02 || (now - lastVerifyTime) > recheckDelay
+        );
+
+        if(verified && lastServerDescriptor){
+          const stillMatch = faceapi.euclideanDistance(lastServerDescriptor, descriptor) <= 0.05;
+          if(!stillMatch){
+            console.log('Face no longer matches, re-verifying...');
+            verified = false;
+            setStatus('Wajah berubah, memverifikasi ulang...', '', false);
+          }
+        }
+
+        if(!verified && shouldVerify){
+          lastSentDescriptor = descriptor;
+          lastVerifyTime = now;
+          await compareWithServer(descriptor);
+        }
+      } catch(err) {
+        console.error('processFrame error:', err);
       }
     };
 
