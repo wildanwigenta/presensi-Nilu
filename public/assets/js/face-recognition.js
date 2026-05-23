@@ -167,9 +167,12 @@
     let lastServerDescriptor = null;
     let lastServerDistance = null;
     let lastVerifyTime = 0;
+    let faceGoneCount = 0;         // hitung berapa frame wajah tidak cocok
+    const FACE_GONE_THRESHOLD = 8; // butuh 8 frame berturut-turut baru reset
 
     const resetStatus = () => {
       verified = false;
+      faceGoneCount = 0;
       button.disabled = true;
       matchEl.textContent = '';
     };
@@ -261,11 +264,18 @@
         );
 
         if(verified && lastServerDescriptor){
-          const stillMatch = faceapi.euclideanDistance(lastServerDescriptor, descriptor) <= 0.05;
+          const stillMatch = faceapi.euclideanDistance(lastServerDescriptor, descriptor) <= 0.25;
           if(!stillMatch){
-            console.log('Face no longer matches, re-verifying...');
-            verified = false;
-            setStatus('Wajah berubah, memverifikasi ulang...', '', false);
+            faceGoneCount++;
+            console.log(`Face drift detected (${faceGoneCount}/${FACE_GONE_THRESHOLD})`);
+            if(faceGoneCount >= FACE_GONE_THRESHOLD){
+              console.log('Face no longer matches, re-verifying...');
+              verified = false;
+              lastServerDescriptor = null;
+              setStatus('Wajah berubah, memverifikasi ulang...', '', false);
+            }
+          } else {
+            faceGoneCount = 0;
           }
         }
 
