@@ -14,24 +14,36 @@ class Home extends BaseController
   
     public function index()
     {
-        $lokasi_presensi = new LokasiPresensiModel();
+        // Ambil timezone dari lokasi presensi pegawai
+        $lokasi_presensi_model = new LokasiPresensiModel();
         $pegawai_model = new PegawaiModel();
         $presensi_model = new PresensiModel();
         $pegawai_shift_model = new PegawaiShiftModel();
-        
+
         $id_pegawai = session()->get('id_pegawai');
-        
-        // Pastikan id_pegawai ada di session
-        if(!$id_pegawai) {
+
+        if (!$id_pegawai) {
             session()->setFlashdata('pesan', 'Data pegawai tidak ditemukan');
             return redirect()->to('/logout');
         }
-        
+
         $pegawai = $pegawai_model->where('id', $id_pegawai)->first();
-        
-        if(!$pegawai) {
+
+        if (!$pegawai) {
             session()->setFlashdata('pesan', 'Data pegawai tidak ditemukan');
             return redirect()->to('/logout');
+        }
+
+        // Set timezone sesuai lokasi pegawai SEBELUM date()
+        $lokasi = $lokasi_presensi_model->where('id', $pegawai['lokasi_presensi'])->first();
+        if ($lokasi) {
+            if ($lokasi['zona_waktu'] == 'WIB') {
+                date_default_timezone_set('Asia/Jakarta');
+            } elseif ($lokasi['zona_waktu'] == 'WITA') {
+                date_default_timezone_set('Asia/Makassar');
+            } elseif ($lokasi['zona_waktu'] == 'WIT') {
+                date_default_timezone_set('Asia/Jayapura');
+            }
         }
 
         $shifts = $pegawai_shift_model
@@ -40,7 +52,8 @@ class Home extends BaseController
             ->where('pegawai_shift.pegawai_id', $id_pegawai)
             ->findAll();
 
-        $today = date('Y-m-d');
+        $today = date('Y-m-d'); // sekarang pakai timezone yang benar
+
         $today_presensi = $presensi_model
             ->where('id_pegawai', $id_pegawai)
             ->where('tanggal_masuk', $today)
@@ -60,14 +73,14 @@ class Home extends BaseController
             ->first();
 
         $data = [
-            'title' => 'Home', 
-            'lokasi_presensi' => $lokasi_presensi->where('id', $pegawai['lokasi_presensi'])->first(),
-            'cek_presensi' => $today_presensi,
-            'open_presensi' => $open_presensi,
+            'title'               => 'Home',
+            'lokasi_presensi'     => $lokasi,
+            'cek_presensi'        => $today_presensi,
+            'open_presensi'       => $open_presensi,
             'cek_presensi_keluar' => $today_presensi - $open_presensi,
-            'ambil_presensi_masuk' => $ambil_presensi_masuk,
-            'pegawai' => $pegawai,
-            'shifts' => $shifts
+            'ambil_presensi_masuk'=> $ambil_presensi_masuk,
+            'pegawai'             => $pegawai,
+            'shifts'              => $shifts
         ];
 
         return view('pegawai/home', $data);
