@@ -91,6 +91,7 @@
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
       window.faceRecognitionStream = stream;
       video.srcObject = stream;
+      statusEl.textContent = 'Mengaktifkan kamera...';
       await video.play();
     }catch(err){
       statusEl.textContent = 'Akses kamera ditolak atau tidak tersedia.';
