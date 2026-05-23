@@ -11,7 +11,7 @@
     }
 
     button.disabled = true;
-    statusEl.textContent = 'Memuat face-api.js...';
+    statusEl.textContent = 'Memuat model wajah...';
     matchEl.textContent = '';
 
     if(typeof faceapi === 'undefined'){
@@ -32,12 +32,14 @@
     let modelUrl = localModelUrl;
     try{
       await loadModelSet(modelUrl);
+      statusEl.textContent = 'Model face-api dimuat.';
     }catch(err){
       console.warn('Local model load failed, trying fallback:', err);
       statusEl.textContent = 'Memuat model face-api dari server remote...';
       modelUrl = fallbackModelUrl;
       try{
         await loadModelSet(modelUrl);
+        statusEl.textContent = 'Model face-api dimuat dari server remote.';
       }catch(remoteErr){
         statusEl.textContent = 'Gagal memuat model face-api.';
         console.error('Load face-api models error:', remoteErr);
@@ -96,8 +98,21 @@
       return;
     }
 
-    const displaySize = { width: cameraContainer.clientWidth || 320, height: cameraContainer.clientHeight || 240 };
-    faceapi.matchDimensions(canvas, displaySize);
+    const setDisplaySize = () => {
+      const displaySize = {
+        width: video.videoWidth || cameraContainer.clientWidth || 320,
+        height: video.videoHeight || cameraContainer.clientHeight || 240
+      };
+      canvas.width = displaySize.width;
+      canvas.height = displaySize.height;
+      faceapi.matchDimensions(canvas, displaySize);
+      return displaySize;
+    };
+
+    const displaySize = setDisplaySize();
+    video.addEventListener('loadedmetadata', () => {
+      setDisplaySize();
+    });
 
     let verifying = false;
     let verified = false;

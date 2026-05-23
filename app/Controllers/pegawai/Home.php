@@ -280,6 +280,7 @@ class Home extends BaseController
 
     public function verify_face()
     {
+        $id_pegawai = session()->get('id_pegawai');
         $request = \Config\Services::request();
         if (!$id_pegawai) {
             return $this->response->setJSON([
