@@ -199,7 +199,9 @@ class Home extends BaseController
             'tanggal_masuk' =>$tanggal_masuk,
             'jam_masuk' =>$jam_masuk,
             'shift_id' => $shift_id,
-            'foto_masuk' => $nama_foto
+            'foto_masuk' => $nama_foto,
+            'tanggal_keluar' => null,
+            'jam_keluar' => null
            ]);
         session()->setFlashData('berhasil', 'Presensi Masuk Berhasil');
          return redirect()->to(base_url('pegawai/home')) ;
@@ -260,6 +262,14 @@ class Home extends BaseController
         $request = \Config\Services::request();
         $tanggal_keluar = $request->getPost('tanggal_keluar');
         $jam_keluar = $request->getPost('jam_keluar');
+
+        // Jika nilai yang dikirim kosong atau tidak valid, gunakan waktu server saat ini
+        if (empty($tanggal_keluar) || $tanggal_keluar === '0000-00-00') {
+            $tanggal_keluar = date('Y-m-d');
+        }
+        if (empty($jam_keluar) || $jam_keluar === '00:00:00') {
+            $jam_keluar = date('H:i:s');
+        }
         $foto_keluar = $request->getPost('foto_keluar');
 
         $presensi_model = new PresensiModel();

@@ -34,8 +34,7 @@
                     // Hitung total jam kerja
                     $total_jam_kerja = '-';
                     if (!empty($rekap['jam_masuk']) && !empty($rekap['jam_keluar']) 
-                    && $rekap['jam_keluar'] !== '00:00:00' 
-                    && $rekap['tanggal_keluar'] !== '0000-00-00'
+                    && $rekap['jam_keluar'] !== null
                     && $rekap['tanggal_keluar'] !== null) {
                         $masuk  = new DateTime($rekap['tanggal_masuk'] . ' ' . $rekap['jam_masuk']);
                         $keluar = new DateTime(($rekap['tanggal_keluar'] ?: $rekap['tanggal_masuk']) . ' ' . $rekap['jam_keluar']);
@@ -46,7 +45,11 @@
                         }
                         
                         $diff = $masuk->diff($keluar);
-                        $total_jam_kerja = $diff->h + ($diff->days * 24) . ' jam ' . $diff->i . ' menit';
+                        $total_hours = ($diff->days * 24) + $diff->h;
+                        $total_jam_kerja = $total_hours . ' jam ' . $diff->i . ' menit';
+                        if ($diff->s > 0) {
+                            $total_jam_kerja .= ' ' . $diff->s . ' detik';
+                        }
                     }
 
                     // Hitung keterlambatan
