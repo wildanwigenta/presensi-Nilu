@@ -9,7 +9,6 @@ This repository holds a composer-installable app starter.
 It has been built from the
 [development repository](https://github.com/codeigniter4/CodeIgniter4).
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
 
 You can read the [user guide](https://codeigniter.com/user_guide/)
 corresponding to the latest version of the framework.
