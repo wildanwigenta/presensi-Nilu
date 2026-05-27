@@ -7,8 +7,6 @@ use App\Models\KetidakhadiranModel;
 use App\Models\PegawaiModel;
 use App\Models\PresensiModel;
 
-use CodeIgniter\HTTP\ResponseInterface;
-
 class Home extends BaseController
 {
     public function index()
