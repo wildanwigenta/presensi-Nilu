@@ -29,13 +29,13 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <style>
-  .shift-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-  }
+    .shift-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
 
-  .shift-card {
+    .shift-card {
       display: flex;
       align-items: flex-start;
       gap: 10px;
@@ -46,45 +46,45 @@
       cursor: pointer;
       transition: border-color .15s, background .15s;
       margin-bottom: 0;
-  }
+    }
 
-  .shift-card:hover {
+    .shift-card:hover {
       border-color: #86b7fe;
       background: #f8f9ff;
-  }
+    }
 
-  .shift-card:has(input:checked) {
+    .shift-card:has(input:checked) {
       border-color: #86b7fe;
       background: #e8f0ff;
-  }
+    }
 
-  .shift-checkbox {
+    .shift-checkbox {
       margin-top: 3px;
       width: 16px;
       height: 16px;
       flex-shrink: 0;
       cursor: pointer;
       accent-color: #0d6efd;
-  }
+    }
 
-  .shift-info {
+    .shift-info {
       display: flex;
       flex-direction: column;
       gap: 2px;
-  }
+    }
 
-  .shift-name {
+    .shift-name {
       font-size: 14px;
       font-weight: 600;
       color: #212529;
-  }
+    }
 
-  .shift-meta {
+    .shift-meta {
       font-size: 12px;
       color: #6c757d;
-  }
+    }
 
-  .shift-badge {
+    .shift-badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -95,9 +95,9 @@
       color: #495057;
       margin-top: 4px;
       width: fit-content;
-  }
-</style>
-  
+    }
+  </style>
+
 </head>
 
 <body>
@@ -381,24 +381,26 @@
     $(document).ready(function () {
       $('#datatables').DataTable();
     });
-    
-    //sweetalert berhasil
-    <?php if (session()->getFlashdata('berhasil')) : ?>
-    $(function () {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true
-    });
 
-      Toast.fire({
-        icon: "success",
-            title: "<?= session()->getFlashdata('berhasil') ?>"
+    //sweetalert berhasil
+    <
+    ? php
+    if (session() - > getFlashdata('berhasil')): ? >
+      $(function () {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
         });
-    });
-    <?php endif; ?>
+
+        Toast.fire({
+          icon: "success",
+          title: "<?= session()->getFlashdata('berhasil') ?>"
+        });
+      }); <
+    ? php endif; ? >
 
     //sweetalert konfirmasi hapus
     $('.tombol-hapus').on('click', function () {
