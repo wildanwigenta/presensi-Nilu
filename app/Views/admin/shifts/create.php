@@ -9,10 +9,13 @@
 
             <div class="input-style-1 mb-3">
                 <label>Lokasi Presensi</label>
-                <select name="lokasi_presensi_id" class="form-control <?= ($validation->hasError('lokasi_presensi_id')) ? 'is-invalid' : '' ?>">
+                <select name="lokasi_presensi_id"
+                    class="form-control <?= ($validation->hasError('lokasi_presensi_id')) ? 'is-invalid' : '' ?>">
                     <option value="">-- Pilih Lokasi --</option>
                     <?php foreach($lokasi_presensi as $lokasi): ?>
-                        <option value="<?= $lokasi['id'] ?>" <?= old('lokasi_presensi_id', $selected_lokasi) == $lokasi['id'] ? 'selected' : '' ?>><?= esc($lokasi['nama_lokasi']) ?></option>
+                    <option value="<?= $lokasi['id'] ?>"
+                        <?= old('lokasi_presensi_id', $selected_lokasi) == $lokasi['id'] ? 'selected' : '' ?>>
+                        <?= esc($lokasi['nama_lokasi']) ?></option>
                     <?php endforeach; ?>
                 </select>
                 <div class="invalid-feedback"><?= $validation->getError('lokasi_presensi_id') ?></div>
@@ -20,19 +23,25 @@
 
             <div class="input-style-1 mb-3">
                 <label>Nama Shift</label>
-                <input type="text" name="nama_shift" class="form-control <?= ($validation->hasError('nama_shift')) ? 'is-invalid' : '' ?>" value="<?= old('nama_shift') ?>" placeholder="Nama Shift" />
+                <input type="text" name="nama_shift"
+                    class="form-control <?= ($validation->hasError('nama_shift')) ? 'is-invalid' : '' ?>"
+                    value="<?= old('nama_shift') ?>" placeholder="Nama Shift" />
                 <div class="invalid-feedback"><?= $validation->getError('nama_shift') ?></div>
             </div>
 
             <div class="input-style-1 mb-3">
                 <label>Jam Masuk</label>
-                <input type="time" name="jam_masuk" class="form-control <?= ($validation->hasError('jam_masuk')) ? 'is-invalid' : '' ?>" value="<?= old('jam_masuk') ?>" />
+                <input type="time" name="jam_masuk"
+                    class="form-control <?= ($validation->hasError('jam_masuk')) ? 'is-invalid' : '' ?>"
+                    value="<?= old('jam_masuk') ?>" />
                 <div class="invalid-feedback"><?= $validation->getError('jam_masuk') ?></div>
             </div>
 
             <div class="input-style-1 mb-3">
                 <label>Jam Keluar</label>
-                <input type="time" name="jam_keluar" class="form-control <?= ($validation->hasError('jam_keluar')) ? 'is-invalid' : '' ?>" value="<?= old('jam_keluar') ?>" />
+                <input type="time" name="jam_keluar"
+                    class="form-control <?= ($validation->hasError('jam_keluar')) ? 'is-invalid' : '' ?>"
+                    value="<?= old('jam_keluar') ?>" />
                 <div class="invalid-feedback"><?= $validation->getError('jam_keluar') ?></div>
             </div>
 
