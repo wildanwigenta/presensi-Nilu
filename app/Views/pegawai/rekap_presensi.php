@@ -29,8 +29,8 @@
         </thead>
         <tbody>
             <?php if(!empty($rekap_presensi)) : ?>
-                <?php $no = 1; foreach($rekap_presensi as $rekap) : ?>
-                    <?php
+            <?php $no = 1; foreach($rekap_presensi as $rekap) : ?>
+            <?php
                     // Hitung total jam kerja
                     $total_jam_kerja = '-';
                     if (!empty($rekap['jam_masuk']) && !empty($rekap['jam_keluar']) 
@@ -66,21 +66,21 @@
                         }
                     }
                     ?>
-                    <tr>
-                        <td><?= $no++ ?></td>
-                        <td><?= esc($rekap['nama']) ?></td>
-                        <td><?= esc($rekap['nama_shift'] ?? '-') ?></td>
-                        <td><?= date('d F Y', strtotime($rekap['tanggal_masuk'])) ?></td>
-                        <td><?= esc($rekap['jam_masuk']) ?></td>
-                        <td><?= !empty($rekap['jam_keluar']) ? esc($rekap['jam_keluar']) : '-' ?></td>
-                        <td><?= $total_jam_kerja ?></td>
-                        <td><?= $total_terlambat ?></td>
-                    </tr>
-                <?php endforeach; ?>
+            <tr>
+                <td><?= $no++ ?></td>
+                <td><?= esc($rekap['nama']) ?></td>
+                <td><?= esc($rekap['nama_shift'] ?? '-') ?></td>
+                <td><?= date('d F Y', strtotime($rekap['tanggal_masuk'])) ?></td>
+                <td><?= esc($rekap['jam_masuk']) ?></td>
+                <td><?= !empty($rekap['jam_keluar']) ? esc($rekap['jam_keluar']) : '-' ?></td>
+                <td><?= $total_jam_kerja ?></td>
+                <td><?= $total_terlambat ?></td>
+            </tr>
+            <?php endforeach; ?>
             <?php else : ?>
-                <tr>
-                    <td colspan="8" class="text-center">Tidak ada data presensi</td>
-                </tr>
+            <tr>
+                <td colspan="8" class="text-center">Tidak ada data presensi</td>
+            </tr>
             <?php endif; ?>
         </tbody>
     </table>
