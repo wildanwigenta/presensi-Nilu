@@ -3,10 +3,12 @@
 <?= $this->section('content') ?>
 
 <script>
-  window.faceVerificationConfig = {
-    verifyUrl: '<?= base_url('pegawai/verify_face') ?>',
-    modelUrl: '<?= base_url('assets/models') ?>'
-  };
+    window.faceVerificationConfig = {
+        verifyUrl: '<?= base_url('
+        pegawai / verify_face ') ?>',
+        modelUrl: '<?= base_url('
+        assets / models ') ?>'
+    };
 </script>
 
 <!-- face-api.js and loader for face recognition (models loaded from /assets/models) -->
@@ -22,13 +24,13 @@
 <button class="btn btn-danger mt-2" id="ambil-foto-keluar" disabled>Keluar</button>
 
 <script>
-    document.getElementById('ambil-foto-keluar').addEventListener('click', function(){
-        if(this.disabled){
+    document.getElementById('ambil-foto-keluar').addEventListener('click', function () {
+        if (this.disabled) {
             return;
         }
 
         const video = document.getElementById('face_video');
-        if(!video){
+        if (!video) {
             return;
         }
 
@@ -40,10 +42,11 @@
         const data_uri = canvas.toDataURL('image/jpeg', 0.9);
 
         var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            document.getElementById('my_result').innerHTML = '<img src="' + data_uri +'"/>';
+        xhttp.onreadystatechange = function () {
+            document.getElementById('my_result').innerHTML = '<img src="' + data_uri + '"/>';
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-                window.location.href = '<?= base_url('pegawai/home') ?>';
+                window.location.href = '<?= base_url('
+                pegawai / home ') ?>';
             }
         };
         xhttp.open("POST", "<?= base_url('pegawai/presensi_keluar_aksi/' . $id_presensi) ?>", true);
@@ -55,5 +58,5 @@
         );
     });
 </script>
-    
+
 <?= $this->endSection() ?>
