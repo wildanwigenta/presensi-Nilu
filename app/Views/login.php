@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -10,7 +11,7 @@
     <!-- ========== All CSS files linkup ========= -->
     <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap.min.css') ?>" />
     <link rel="stylesheet" href="<?= base_url('assets/css/main.css') ?>" />
-    
+
     <style>
         * {
             margin: 0;
@@ -19,7 +20,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #ffffff 0%, #0D2B3E 100% );
+            background: linear-gradient(135deg, #ffffff 0%, #0D2B3E 100%);
             font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             display: flex;
@@ -138,7 +139,9 @@
         }
 
         /* Hilangkan style bawaan section signin */
-        .signin-section, .auth-row, .signin-wrapper {
+        .signin-section,
+        .auth-row,
+        .signin-wrapper {
             background: transparent !important;
             box-shadow: none !important;
             padding: 0 !important;
@@ -168,7 +171,7 @@
             justify-content: center;
             padding: 0;
         }
-        
+
         .signin-wrapper {
             width: 100%;
             display: flex;
@@ -184,17 +187,17 @@
             display: flex;
             justify-content: center;
         }
-        
+
         .invalid-feedback {
             color: #DC2626;
             font-size: 0.7rem;
             margin-top: 4px;
         }
-        
+
         .is-invalid {
             border-color: #DC2626 !important;
         }
-        
+
         .alert-custom .btn-close {
             filter: brightness(0.3);
             font-size: 10px;
@@ -202,6 +205,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="preloader">
         <div class="spinner"></div>
@@ -227,7 +231,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-6">
                     <div class="signin-wrapper">
                         <div class="form-wrapper">
@@ -242,28 +246,32 @@
                                 <!-- Body Putih -->
                                 <div class="card-body-white">
                                     <?php if (!empty(session()->getFlashdata('pesan'))) : ?>
-                                    <div class="alert-custom alert-dismissible fade show" role="alert" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div class="alert-custom alert-dismissible fade show" role="alert"
+                                        style="display: flex; justify-content: space-between; align-items: center;">
                                         <span><?= session()->getFlashdata('pesan') ?></span>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 10px;"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close" style="font-size: 10px;"></button>
                                     </div>
                                     <?php endif ?>
 
                                     <form method="POST" action="<?= base_url('login')?>">
                                         <?= csrf_field() ?>
-                                        
+
                                         <div class="input-group-custom">
                                             <label>Username</label>
-                                            <input type="text" class="form-control-custom <?= (isset($validation) && $validation->hasError('username')) ? 'is-invalid' : '' ?>" 
-                                                   placeholder="nama" name="username" value="<?= old('username') ?>" />
+                                            <input type="text"
+                                                class="form-control-custom <?= (isset($validation) && $validation->hasError('username')) ? 'is-invalid' : '' ?>"
+                                                placeholder="nama" name="username" value="<?= old('username') ?>" />
                                             <div class="invalid-feedback">
                                                 <?= (isset($validation)) ? $validation->getError('username') : '' ?>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="input-group-custom">
                                             <label>Password</label>
-                                            <input type="password" class="form-control-custom <?= (isset($validation) && $validation->hasError('password')) ? 'is-invalid' : '' ?>" 
-                                                   placeholder="Password" name="password"/>
+                                            <input type="password"
+                                                class="form-control-custom <?= (isset($validation) && $validation->hasError('password')) ? 'is-invalid' : '' ?>"
+                                                placeholder="Password" name="password" />
                                             <div class="invalid-feedback">
                                                 <?= (isset($validation)) ? $validation->getError('password') : '' ?>
                                             </div>
@@ -273,7 +281,7 @@
                                             Connect
                                         </button>
                                     </form>
-                                    
+
                                     <div class="powered">
                                         Powered by MikroTik RouterOS
                                     </div>
@@ -290,4 +298,5 @@
     <script src="<?= base_url('assets/js/bootstrap.bundle.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
 </body>
+
 </html>
