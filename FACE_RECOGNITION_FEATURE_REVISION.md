@@ -1,5 +1,3 @@
-# FACE RECOGNITION FEATURE REVISION
-## Sistem Presensi Cafe - CodeIgniter 4
 
 ---
 
