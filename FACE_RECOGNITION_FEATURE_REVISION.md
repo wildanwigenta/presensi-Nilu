@@ -1,6 +1,4 @@
 
-Project ini adalah sistem presensi cafe berbasis CodeIgniter 4.
-
 Sistem saat ini sudah memiliki fitur:
 - Login pegawai
 - Presensi masuk & keluar
