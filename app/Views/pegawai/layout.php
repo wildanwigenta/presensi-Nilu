@@ -273,27 +273,19 @@
     });
     //sweetalert berhasil
     $(function () {
-      <
-      ? php
-      if (session() - > has('berhasil')) {
-        ? >
+      <?php if (session()->getFlashdata('berhasil')) : ?>
         const Toast = Swal.mixin({
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-          }
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000
         });
+
         Toast.fire({
-          icon: "success",
-          title: "<?= $_SESSION['berhasil'] ?>"
-        }); <
-        ? php
-      } ? >
+            icon: "success",
+            title: "<?= session()->getFlashdata('berhasil') ?>"
+        });
+        <?php endif; ?>
     })
 
     //sweetalert konfirmasi hapus

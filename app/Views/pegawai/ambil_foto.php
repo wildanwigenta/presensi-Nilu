@@ -3,12 +3,10 @@
 <?= $this->section('content') ?>
 
 <script>
-    window.faceVerificationConfig = {
-        verifyUrl: '<?= base_url('
-        pegawai / verify_face ') ?>',
-        modelUrl: '<?= base_url('
-        assets / models ') ?>'
-    };
+  window.faceVerificationConfig = {
+    verifyUrl: '<?= base_url('pegawai/verify_face') ?>',
+    modelUrl: '<?= base_url('assets/models') ?>'
+  };
 </script>
 
 <!-- face-api.js and loader for face recognition (models loaded from /assets/models) -->
@@ -26,54 +24,53 @@
 <button class="btn btn-primary mt-2" id="ambil-foto" disabled>Masuk</button>
 
 <script>
-    document.getElementById('ambil-foto').addEventListener('click', function () {
-        if (this.disabled) return;
+document.getElementById('ambil-foto').addEventListener('click', function(){
+    if(this.disabled) return;
 
-        const video = document.getElementById('face_video');
-        if (!video || video.readyState < 2) {
-            alert('Kamera belum siap, tunggu sebentar.');
-            return;
-        }
+    const video = document.getElementById('face_video');
+    if(!video || video.readyState < 2){
+        alert('Kamera belum siap, tunggu sebentar.');
+        return;
+    }
 
-        // Pastikan video benar-benar playing
-        if (video.readyState < 2) {
-            alert('Kamera belum siap!');
-            return;
-        }
+    // Pastikan video benar-benar playing
+    if(video.readyState < 2){
+        alert('Kamera belum siap!');
+        return;
+    }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = 320;
-        canvas.height = 240;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const data_uri = canvas.toDataURL('image/jpeg', 0.9);
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const data_uri = canvas.toDataURL('image/jpeg', 0.9);
 
-        console.log('data_uri length:', data_uri.length); // harus > 5000
-        console.log('data_uri preview:', data_uri.substring(0, 50));
+    console.log('data_uri length:', data_uri.length); // harus > 5000
+    console.log('data_uri preview:', data_uri.substring(0, 50));
 
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            console.log('readyState:', xhttp.readyState, 'status:', xhttp.status);
-            if (xhttp.readyState == 4) {
-                console.log('Response:', xhttp.responseText); // lihat error dari server
-                if (xhttp.status == 200) {
-                    window.location.href = '<?= base_url('
-                    pegawai / home ') ?>';
-                } else {
-                    alert('Gagal presensi. Status: ' + xhttp.status);
-                }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        console.log('readyState:', xhttp.readyState, 'status:', xhttp.status);
+        if (xhttp.readyState == 4) {
+            console.log('Response:', xhttp.responseText); // lihat error dari server
+            if(xhttp.status == 200) {
+                window.location.href = '<?= base_url('pegawai/home') ?>';
+            } else {
+                alert('Gagal presensi. Status: ' + xhttp.status);
             }
-        };
-        xhttp.open("POST", "<?= base_url('pegawai/presensi_masuk_aksi') ?>", true);
-        xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
-        xhttp.send(
-            'foto_masuk=' + encodeURIComponent(data_uri) +
-            '&id_pegawai=' + encodeURIComponent(document.getElementById('id_pegawai').value) +
-            '&tanggal_masuk=' + encodeURIComponent(document.getElementById('tanggal_masuk').value) +
-            '&jam_masuk=' + encodeURIComponent(document.getElementById('jam_masuk').value) +
-            '&shift_id=' + encodeURIComponent(document.getElementById('shift_id').value)
-        );
-    });
+        }
+    };
+    xhttp.open("POST", "<?= base_url('pegawai/presensi_masuk_aksi') ?>", true);
+    xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+    xhttp.send(
+        'foto_masuk=' + encodeURIComponent(data_uri) + 
+        '&id_pegawai=' + encodeURIComponent(document.getElementById('id_pegawai').value) +
+        '&tanggal_masuk=' + encodeURIComponent(document.getElementById('tanggal_masuk').value) +
+        '&jam_masuk=' + encodeURIComponent(document.getElementById('jam_masuk').value) +
+        '&shift_id=' + encodeURIComponent(document.getElementById('shift_id').value)
+    );
+});
 </script>
-
+    
 <?= $this->endSection() ?>

@@ -223,7 +223,7 @@
   }
 
   function initMap(latitude_pegawai, longitude_pegawai) {
-    var map = L.map('map').setView([ < ? = $lokasi_presensi['latitude'] ? > , < ? = $lokasi_presensi['longitude'] ? > ],
+    var map = L.map('map').setView([<?= $lokasi_presensi['latitude'] ?>, <?= $lokasi_presensi['longitude'] ?>],
       13);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -231,7 +231,7 @@
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    L.marker([ < ? = $lokasi_presensi['latitude'] ? > , < ? = $lokasi_presensi['longitude'] ? > ]).addTo(map);
+    L.marker([<?= $lokasi_presensi['latitude'] ?>, <?= $lokasi_presensi['longitude'] ?>]).addTo(map);
 
     L.circle([latitude_pegawai, longitude_pegawai], {
       color: 'red',
