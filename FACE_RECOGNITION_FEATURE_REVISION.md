@@ -1,11 +1,3 @@
-# FACE RECOGNITION FEATURE REVISION
-## Sistem Presensi Cafe - CodeIgniter 4
-
----
-
-# PROJECT OVERVIEW
-
-Project ini adalah sistem presensi cafe berbasis CodeIgniter 4.
 
 Sistem saat ini sudah memiliki fitur:
 - Login pegawai
