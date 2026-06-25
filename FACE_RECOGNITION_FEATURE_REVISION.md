@@ -1,11 +1,3 @@
-
-Sistem saat ini sudah memiliki fitur:
-- Login pegawai
-- Presensi masuk & keluar
-- Validasi lokasi menggunakan latitude, longitude, dan radius
-- Foto selfie saat presensi
-- Sistem multi shift
-
 Namun saat ini sistem masih memiliki kelemahan:
 - pegawai lain masih dapat melakukan presensi menggunakan akun pegawai lain.
 
