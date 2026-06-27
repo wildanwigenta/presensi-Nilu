@@ -1,5 +1,3 @@
-Namun saat ini sistem masih memiliki kelemahan:
-- pegawai lain masih dapat melakukan presensi menggunakan akun pegawai lain.
 
 Contoh:
 - User A login menggunakan akun User B
