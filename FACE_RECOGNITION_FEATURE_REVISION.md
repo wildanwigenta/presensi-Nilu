@@ -1,10 +1,4 @@
 
-Contoh:
-- User A login menggunakan akun User B
-- lalu melakukan presensi menggunakan wajah sendiri
-- sistem tetap menerima presensi
-
-Karena itu diperlukan:
 # sistem face recognition / face verification.
 
 ---
