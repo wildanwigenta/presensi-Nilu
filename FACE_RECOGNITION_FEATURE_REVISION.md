@@ -1,25 +1,4 @@
 
-<<<<<<< HEAD
-- Login pegawai
-- Presensi masuk & keluar
-- Validasi lokasi menggunakan latitude, longitude, dan radius
-- Foto selfie saat presensi
-- Sistem multi shift
-
-Namun saat ini sistem masih memiliki kelemahan:
-- pegawai lain masih dapat melakukan presensi menggunakan akun pegawai lain.
-
-Contoh:
-- User A login menggunakan akun User B
-- lalu melakukan presensi menggunakan wajah sendiri
-- sistem tetap menerima presensi
-
-Karena itu diperlukan:
-=======
->>>>>>> e6013f6fc985c19d6c45da63a60840c7de32bd81
-# sistem face recognition / face verification.
-
----
 
 # OBJECTIVE
 
