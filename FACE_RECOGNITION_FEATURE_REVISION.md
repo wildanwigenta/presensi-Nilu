@@ -1,6 +1,5 @@
 
 
-Membuat sistem validasi wajah agar:
 - wajah pengguna harus sesuai dengan akun yang login
 - pegawai lain tidak dapat menggunakan akun orang lain
 - sistem dapat membandingkan wajah realtime dengan data wajah pegawai yang tersimpan
