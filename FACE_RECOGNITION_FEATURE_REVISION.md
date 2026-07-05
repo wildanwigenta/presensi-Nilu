@@ -1,7 +1,3 @@
-
-
-
-
 ## Backend
 - CodeIgniter 4
 
