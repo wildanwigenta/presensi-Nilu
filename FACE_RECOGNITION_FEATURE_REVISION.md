@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 - Login pegawai
 - Presensi masuk & keluar
 - Validasi lokasi menggunakan latitude, longitude, dan radius
@@ -14,6 +15,8 @@ Contoh:
 - sistem tetap menerima presensi
 
 Karena itu diperlukan:
+=======
+>>>>>>> e6013f6fc985c19d6c45da63a60840c7de32bd81
 # sistem face recognition / face verification.
 
 ---
