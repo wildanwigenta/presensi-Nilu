@@ -1,6 +1,3 @@
-
-# TECHNOLOGY STACK
-
 ## Frontend
 - JavaScript
 - Webcam API
