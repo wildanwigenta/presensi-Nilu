@@ -1,7 +1,7 @@
 
 
 
-- pegawai lain tidak dapat menggunakan akun orang lain
+
 - sistem dapat membandingkan wajah realtime dengan data wajah pegawai yang tersimpan
 
 ---
