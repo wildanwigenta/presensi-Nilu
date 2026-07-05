@@ -1,5 +1,3 @@
-
-Metode yang digunakan:
 # Face Recognition menggunakan face-api.js
 
 ---
