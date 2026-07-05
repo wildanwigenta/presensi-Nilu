@@ -1,5 +1,4 @@
 
-Sistem saat ini sudah memiliki fitur:
 - Login pegawai
 - Presensi masuk & keluar
 - Validasi lokasi menggunakan latitude, longitude, dan radius
