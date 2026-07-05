@@ -1,4 +1,3 @@
-## Frontend
 - JavaScript
 - Webcam API
 - face-api.js
