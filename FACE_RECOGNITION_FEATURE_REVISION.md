@@ -1,6 +1,3 @@
-
----
-
 # IMPLEMENTATION METHOD
 
 Metode yang digunakan:
