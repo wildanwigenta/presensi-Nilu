@@ -1,9 +1,4 @@
 
-
-
-
-- sistem dapat membandingkan wajah realtime dengan data wajah pegawai yang tersimpan
-
 ---
 
 # IMPLEMENTATION METHOD
