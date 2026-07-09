@@ -1,7 +1,3 @@
-- CodeIgniter 4
-
----
-
 # WHY USING FACE-API.JS
 
 face-api.js dipilih karena:
