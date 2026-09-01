@@ -1,12 +1,4 @@
-face-api.js dipilih karena:
-- ringan
-- realtime
-- berjalan langsung di browser
-- tidak memerlukan training AI sendiri
-- cocok untuk project skripsi
-- mudah diintegrasikan dengan CodeIgniter 4
 
----
 
 # IMPORTANT NOTES
 
